@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://audiolocal.app/sitemap.xml
+Sitemap: https://audio-local.vercel.app/sitemap.xml
