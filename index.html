@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>AudioLocal | Convertidor de audio local, rápido y privado</title>
+  <meta name="description"
+    content="Convierte MP3, WAV y otros formatos directamente en tu navegador. 100% local, sin subida de archivos y sin registro." />
+  <meta name="author" content="AudioLocal" />
+  <meta name="theme-color" content="#0f0f0f" />
+  <link rel="canonical" href="https://audiolocal.app/" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="AudioLocal | Convertidor de audio local, rápido y privado" />
+  <meta property="og:description"
+    content="Procesa audio en el navegador sin subir archivos. Privacidad total, compatibilidad moderna y descarga instantánea." />
+  <meta property="og:image" content="assets/audiolocal_og.png" />
+  <meta property="og:url" content="https://audiolocal.app/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AudioLocal | Convertidor de audio local, rápido y privado" />
+  <meta name="twitter:description"
+    content="Procesa audio en el navegador sin subir archivos. Privacidad total, compatibilidad moderna y descarga instantánea." />
+  <meta name="twitter:image" content="assets/audiolocal_og.png" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/lame.min.js"></script>
+
+</head>
+
+
+<body>
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">AudioLocal</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link active">Convertir</a>
+        <a href="about.html" class="nav-link">Acerca de</a>
+        <a href="privacy.html" class="nav-link">Privacidad</a>
+        <a href="terms.html" class="nav-link">Términos</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- HEADER -->
+    <header class="hero">
+      <div class="logo-badge">AudioLocal</div>
+      <h1>Convertidor de Audio<br><span class="highlight">100% Local</span></h1>
+      <p class="subtitle">
+        Transformá MP3, WAV y otros formatos<br>
+        directamente en tu navegador. Sin servidores • Sin registro • Privacidad total.
+      </p>
+      <div class="hero-badges">
+        <span>Procesamiento 100% local</span>
+        <span>No se suben archivos</span>
+        <span>Compatible con desktop y móvil</span>
+      </div>
+    </header>
+
+    <!-- UPLOAD CARD -->
+    <section class="card" id="uploadCard">
+      <div class="dropzone" id="dropzone">
+        <div class="drop-title">Arrastra o selecciona tu archivo de audio</div>
+        <div class="drop-sub">Soporta MP3, WAV, OGG, AAC y formatos comunes.</div>
+        <button type="button" class="btn-browse" id="btnBrowse">Elegir archivo</button>
+        <div class="formats-hint">
+          Formatos soportados: <span>MP3</span><span>WAV</span><span>OGG</span><span>AAC</span>
+        </div>
+        <span id="inputFormatBadge" class="input-format-badge" aria-hidden="true"></span>
+      </div>
+
+      <input type="file" id="fileInput" accept="audio/*" hidden aria-label="Selecciona archivo de audio" />
+
+      <div class="settings-grid">
+        <div class="setting-group">
+          <label for="mode">Formato de salida</label>
+          <select id="mode">
+            <option value="wav">WAV (Sin compresión)</option>
+            <option value="mp3_128">MP3 128 kbps</option>
+            <option value="mp3_256">MP3 256 kbps</option>
+            <option value="mp3_320">MP3 320 kbps</option>
+          </select>
+
+        </div>
+        <div class="setting-group">
+          <label for="colors">Canales</label>
+          <select id="colors">
+            <option value="1">Mono</option>
+            <option value="2" selected>Stereo</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label for="smooth">Frecuencia de muestreo</label>
+          <select id="smooth">
+            <option value="8000">8,000 Hz</option>
+            <option value="11025">11,025 Hz</option>
+            <option value="16000">16,000 Hz</option>
+            <option value="22050">22,050 Hz</option>
+            <option value="44100" selected>44,100 Hz</option>
+            <option value="48000">48,000 Hz</option>
+            <option value="96000">96,000 Hz</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label for="normalizeSelect">Normalizar</label>
+          <div class="range-wrap">
+            <select id="normalizeSelect">
+              <option value="0" selected>No</option>
+              <option value="1">Sí</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn-convert" id="btnConvert" disabled>Iniciar conversión</button>
+
+      <div class="progress-wrap" id="progressWrap" hidden>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-label" id="progressLabel">Procesando audio...</div>
+      </div>
+    </section>
+
+    <!-- AD ZONE: Rectangle -->
+    <div class="donate-zone" id="donate-middle">
+      <p class="donate-text">☕ ¿AudioLocal te fue útil? Invitame un café</p>
+      <a href="https://ko-fi.com/audiolocal" target="_blank" rel="noopener" class="btn-kofi">
+        <img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" alt="Donar en Ko-fi" />
+        Apoyar el proyecto
+      </a>
+    </div>
+
+    <!-- PREVIEW CARD -->
+    <section class="card preview-section" id="previewSection" hidden>
+      <div class="preview-header">
+        <span class="preview-title">Resultado</span>
+        <span class="badge-success">Convertido</span>
+      </div>
+
+      <div class="preview-grid">
+        <div class="preview-box">
+          <div class="preview-box-header">Original <span class="size-badge" id="origSize">—</span></div>
+          <div class="svg-preview">
+            <audio id="origPreview" controls></audio>
+          </div>
+
+        </div>
+        <div class="preview-box">
+          <div class="preview-box-header">Audio convertido <span class="size-badge" id="convertedSize">—</span></div>
+          <div class="svg-preview" id="convertedPreview"></div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button type="button" class="btn-download" id="btnDownload">Descargar audio</button>
+        <button type="button" class="btn-reset" id="btnReset">Nuevo audio</button>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features">
+      <div class="feature">
+        <div class="feature-title">100% Privado</div>
+        <div class="feature-desc">Todo se procesa en tu navegador. Tus archivos nunca salen de tu dispositivo.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-title">Muy Rápido</div>
+        <div class="feature-desc">Conversión instantánea sin esperas de upload ni servidores.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-title">Total Control</div>
+        <div class="feature-desc">Elige formato, calidad, canales y frecuencia de muestreo.</div>
+      </div>
+    </section>
+
+    <!-- SEO CONTENT + FAQ -->
+    <section class="seo-content card">
+      <h2>¿Cómo convertir audio gratis y sin perder calidad?</h2>
+      <p>AudioLocal es un convertidor que trabaja completamente en tu navegador utilizando tecnologías modernas como
+        WebAssembly. Esto significa que tu privacidad está protegida y la conversión es mucho más rápida.</p>
+
+      <h3>¿Por qué convertir a WAV?</h3>
+      <p>El formato WAV es ideal para edición profesional, ya que es lossless (sin pérdida de calidad). Perfecto para
+        productores, podcasters y músicos.</p>
+
+      <h3>Preguntas Frecuentes</h3>
+      <details>
+        <summary>¿Es realmente seguro usar AudioLocal?</summary>
+        <p>Sí. Todo el procesamiento ocurre en tu dispositivo. No subimos ni almacenamos ningún archivo.</p>
+      </details>
+      <details>
+        <summary>¿Funciona en el celular?</summary>
+        <p>Sí, funciona en móviles Android e iOS a través del navegador.</p>
+      </details>
+      <details>
+        <summary>¿Hay límites de tamaño de archivo?</summary>
+        <p>Depende de la memoria de tu dispositivo. La mayoría de archivos comunes funcionan sin problema.</p>
+      </details>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">AudioLocal</div>
+      <div class="footer-links">
+        <a href="about.html">Acerca de</a>
+        <a href="privacy.html">Privacidad</a>
+        <a href="terms.html">Términos</a>
+      </div>
+      <p class="footer-copy">
+        © 2026 AudioLocal · Procesamiento 100% local · Sin registro · Gratis para siempre
+      </p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      if (toggle && links) {
+        toggle.addEventListener('click', () => {
+          toggle.classList.toggle('open');
+          links.classList.toggle('open');
+        });
+      }
+    });
+  </script>
+  <script src="js/converter.js"></script>
+</body>
+
+</html>

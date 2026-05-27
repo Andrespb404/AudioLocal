@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AudioLocal | Términos y Condiciones</title>
+    <meta name="description" content="Términos y Condiciones de uso de AudioLocal" />
+    <link rel="canonical" href="https://tusitio.com/terms.html" />
+    <meta property="og:title" content="AudioLocal — Términos y Condiciones" />
+    <meta property="og:description" content="Términos de uso del convertidor de audio local" />
+    <meta property="og:image" content="assets/audiolocal_og.png" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">AudioLocal</a>
+            <button class="nav-toggle" id="navToggle" aria-label="Menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html" class="nav-link">Convertir</a>
+                <a href="about.html" class="nav-link">Acerca de</a>
+                <a href="privacy.html" class="nav-link">Privacidad</a>
+                <a href="terms.html" class="nav-link active">Términos</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <div class="logo-badge">Términos</div>
+            <h1>Términos y Condiciones</h1>
+            <p class="subtitle">Última actualización: 20 de mayo de 2026</p>
+        </header>
+
+        <div class="card">
+
+            <h2>1. Aceptación de los Términos</h2>
+            <p>Al acceder y utilizar AudioLocal aceptas estos Términos y Condiciones. Si no estás de acuerdo, por favor
+                no uses el servicio.</p>
+
+            <h2>2. Descripción del Servicio</h2>
+            <p>AudioLocal es una herramienta web que permite convertir archivos de audio directamente en el navegador
+                del usuario. Todo el procesamiento se realiza de forma local.</p>
+
+            <h2>3. Uso del Servicio</h2>
+            <ul>
+                <li>Está prohibido usar el servicio para fines ilegales o que infrinjan derechos de terceros.</li>
+                <li>El usuario es el único responsable del contenido de los archivos que procesa.</li>
+                <li>No está permitido intentar extraer, modificar o revertir el código fuente del convertidor.</li>
+            </ul>
+
+            <h2>4. Propiedad Intelectual</h2>
+            <p>Todo el contenido, diseño y código de AudioLocal pertenece a sus desarrolladores. Se concede un permiso
+                limitado, revocable y no exclusivo para uso personal.</p>
+
+            <h2>5. Limitación de Responsabilidad</h2>
+            <p>El servicio se ofrece "tal cual" sin garantías de ningún tipo. No nos hacemos responsables por:</p>
+            <ul>
+                <li>Pérdida o corrupción de archivos</li>
+                <li>Daños derivados del uso del servicio</li>
+                <li>Problemas de compatibilidad con dispositivos o software</li>
+            </ul>
+
+            <h2>6. Donaciones</h2>
+            <p>El sitio acepta donaciones voluntarias a través de Ko-fi.
+                Las donaciones son opcionales y no afectan el acceso al servicio.</p>
+
+            <h2>7. Modificaciones</h2>
+            <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. El uso continuado del sitio
+                después de los cambios implica aceptación de los nuevos términos.</p>
+
+            <h2>8. Ley Aplicable</h2>
+            <p>Estos términos se rigen por las leyes de la República de Colombia (o el país de residencia del operador).
+            </p>
+
+            <h2>Contacto</h2>
+            <p>Cualquier consulta sobre estos términos puede enviarse a: <a
+                    href="mailto:audiolocal.app@gmail.com">audiolocal.app@gmail.com</a></p>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">AudioLocal</div>
+            <div class="footer-links">
+                <a href="about.html">Acerca de</a>
+                <a href="privacy.html">Privacidad</a>
+                <a href="terms.html">Términos</a>
+            </div>
+            <p class="footer-copy">© 2026 AudioLocal · Procesamiento 100% local</p>
+        </div>
+    </footer>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      if (toggle && links) {
+        toggle.addEventListener('click', () => {
+          toggle.classList.toggle('open');
+          links.classList.toggle('open');
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

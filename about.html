@@ -1,0 +1,153 @@
+﻿<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AudioLocal | Acerca de</title>
+  <meta name="description"
+    content="AudioLocal es un convertidor de audio 100% local y gratuito. Convierte MP3 o WAV directamente en tu navegador sin subir archivos." />
+  <meta name="keywords"
+    content="convertidor audio, mp3 a wav, conversor local, audio wav, privacidad, sin servidores" />
+  <meta name="author" content="AudioLocal" />
+  <link rel="canonical" href="https://tusitio.com/about.html" />
+
+  <meta property="og:title" content="AudioLocal — Acerca de Nosotros" />
+  <meta property="og:description"
+    content="Conocé el convertidor de audio que prioriza tu privacidad y funciona completamente en tu navegador." />
+  <meta property="og:image" content="assets/audiolocal_og.png" />
+  <meta property="og:url" content="https://tusitio.com/about.html" />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">AudioLocal</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">Convertir</a>
+        <a href="about.html" class="nav-link active">Acerca de</a>
+        <a href="privacy.html" class="nav-link">Privacidad</a>
+        <a href="terms.html" class="nav-link">Términos</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <header class="hero">
+      <div class="logo-badge">AudioLocal</div>
+      <h1>Acerca de AudioLocal</h1>
+      <p class="subtitle">
+        El convertidor de audio que respeta tu privacidad.<br>
+        Procesamiento 100% local • Sin registro • Gratis para siempre.
+      </p>
+    </header>
+
+    <section class="card">
+      <h2>Nuestra misión</h2>
+      <p>
+        AudioLocal nació con el objetivo de ofrecer una alternativa <strong>realmente privada y segura</strong> a los
+        convertidores de audio tradicionales.
+        En un mundo donde la mayoría de las herramientas en línea suben tus archivos a servidores externos, nosotros
+        elegimos otro camino:
+        <strong>todo el procesamiento ocurre en tu propio navegador</strong>.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Qué hacemos</h2>
+      <p>
+        AudioLocal es una herramienta web que permite convertir archivos de audio entre los formatos más utilizados:
+        <strong>MP3, WAV, OGG, AAC → WAV o MP3 (128, 256, 320 kbps)</strong>
+      </p>
+      <div class="feature-about">
+        <div>
+          <h3>Privacidad ante todo</h3>
+          <p>Tu audio nunca sale de tu dispositivo. No lo almacenamos, no lo analizamos y no lo compartimos.</p>
+        </div>
+      </div>
+      <div class="feature-about">
+        <div>
+          <h3>Rápido y eficiente</h3>
+          <p>La conversión se realiza localmente usando las tecnologías más modernas del navegador (WebAssembly).</p>
+        </div>
+      </div>
+      <div class="feature-about">
+        <div>
+          <h3>Control total</h3>
+          <p>Elige formato de salida, canales (mono/estéreo) y frecuencia de muestreo según tus necesidades.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Por qué elegir AudioLocal</h2>
+      <ul>
+        <li>No necesitas instalar ningún programa</li>
+        <li>Funciona en cualquier dispositivo (PC, Mac, Android, iOS)</li>
+        <li>Totalmente gratis y sin límites de uso</li>
+        <li>Sin registro ni cuenta</li>
+        <li>Código transparente y respetuoso con tu privacidad</li>
+        <li>Ideal para productores musicales, podcasters, streamers y usuarios preocupados por su privacidad</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Nuestro compromiso</h2>
+      <p>
+        Creemos que tus archivos te pertenecen. Por eso desarrollamos una herramienta que no depende de servidores
+        externos,
+        no recopila tus datos y te da el control total.
+        Nuestro objetivo es seguir mejorando AudioLocal para convertirlo en la mejor opción gratuita y privada del
+        mercado.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Contacto</h2>
+      <p>
+        ¿Tenés alguna consulta, sugerencia o encontraste un error?<br>
+        Escribinos a: <a href="mailto:audiolocal.app@gmail.com">audiolocal.app@gmail.com</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">AudioLocal</div>
+      <div class="footer-links">
+        <a href="about.html">Acerca de</a>
+        <a href="privacy.html">Privacidad</a>
+        <a href="terms.html">Términos</a>
+      </div>
+      <p class="footer-copy">
+        © 2026 AudioLocal · Procesamiento 100% local · Sin registro
+      </p>
+    </div>
+  </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      if (toggle && links) {
+        toggle.addEventListener('click', () => {
+          toggle.classList.toggle('open');
+          links.classList.toggle('open');
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>
