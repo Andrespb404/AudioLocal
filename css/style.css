@@ -840,10 +840,6 @@ input[type="range"]::-webkit-slider-thumb {
     .stats {
         gap: 20px;
     }
-
-    .nav-links {
-        gap: 16px;
-    }
 }
 
 .seo-content {
