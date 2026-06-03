@@ -2,47 +2,34 @@
 <html lang="es">
 
 <head>
+  <title>AudioLocal | Convertidor de audio local, rápido y privado</title>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>AudioLocal | Convertidor de audio local, rápido y privado</title>
-  <meta name="description"
-    content="Convierte MP3, WAV y otros formatos directamente en tu navegador. 100% local, sin subida de archivos y sin registro." />
-  <meta name="author" content="AudioLocal" />
-  <meta name="theme-color" content="#0f0f0f" />
-  <link rel="canonical" href="https://audiolocal.app/" />
-
-  <!-- Open Graph -->
   <meta property="og:title" content="AudioLocal | Convertidor de audio local, rápido y privado" />
+  <meta property="og:url" content="https://audiolocal.app/" />
   <meta property="og:description"
     content="Procesa audio en el navegador sin subir archivos. Privacidad total, compatibilidad moderna y descarga instantánea." />
+  <meta name="description"
+    content="Convierte MP3, WAV y otros formatos directamente en tu navegador. 100% local, sin subida de archivos y sin registro." />
   <meta property="og:image" content="assets/audiolocal_og.png" />
-  <meta property="og:url" content="https://audiolocal.app/" />
   <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="AudioLocal | Convertidor de audio local, rápido y privado" />
-  <meta name="twitter:description"
-    content="Procesa audio en el navegador sin subir archivos. Privacidad total, compatibilidad moderna y descarga instantánea." />
-  <meta name="twitter:image" content="assets/audiolocal_og.png" />
 
-  <!-- Favicon -->
+  <link rel="canonical" href="https://audiolocal.app/" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
-
-  <!-- Fuentes -->
+  <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap"
     rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css" />
   <script src="js/lame.min.js"></script>
 
 </head>
 
 
 <body>
-  <!-- ========== NAVBAR ========== -->
   <nav class="navbar">
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">AudioLocal</a>
@@ -61,7 +48,6 @@
   </nav>
 
   <main class="container">
-    <!-- HEADER -->
     <header class="hero">
       <div class="logo-badge">AudioLocal</div>
       <h1>Convertidor de Audio<br><span class="highlight">100% Local</span></h1>
@@ -76,7 +62,6 @@
       </div>
     </header>
 
-    <!-- UPLOAD CARD -->
     <section class="card" id="uploadCard">
       <div class="dropzone" id="dropzone">
         <div class="drop-title">Arrastra o selecciona tu archivo de audio</div>
@@ -85,9 +70,16 @@
         <div class="formats-hint">
           Formatos soportados: <span>MP3</span><span>WAV</span><span>OGG</span><span>AAC</span>
         </div>
-        <span id="inputFormatBadge" class="input-format-badge" aria-hidden="true"></span>
-      </div>
 
+      </div>
+      <div class="file-summary" id="fileSummary" hidden aria-live="polite">
+        <div class="summary-row"><span>Archivo:</span><strong id="fileName">—</strong></div>
+        <div class="summary-row"><span>Duración:</span><strong id="fileDuration">—</strong></div>
+        <div class="summary-row"><span>Muestreo:</span><strong id="fileSampleRate">—</strong></div>
+        <div class="summary-row"><span>Canales:</span><strong id="fileChannels">—</strong></div>
+        <div class="summary-row"><span>Formato:</span><strong id="origFormat">—</strong></div>
+        <div class="summary-row full-width"><span>Salida estimada:</span><strong id="outputEstimate">—</strong></div>
+      </div>
       <input type="file" id="fileInput" accept="audio/*" hidden aria-label="Selecciona archivo de audio" />
 
       <div class="settings-grid">
@@ -115,8 +107,8 @@
             <option value="11025">11,025 Hz</option>
             <option value="16000">16,000 Hz</option>
             <option value="22050">22,050 Hz</option>
-            <option value="44100" selected>44,100 Hz</option>
-            <option value="48000">48,000 Hz</option>
+            <option value="44100">44,100 Hz</option>
+            <option value="48000" selected>48,000 Hz</option>
             <option value="96000">96,000 Hz</option>
           </select>
         </div>
@@ -128,6 +120,11 @@
               <option value="1">Sí</option>
             </select>
           </div>
+        </div>
+        <div class="setting-group checkbox-group">
+          <label for="keepSampleRate">
+            <input type="checkbox" id="keepSampleRate" /> <p> Mantener frecuencia original</p>
+          </label>
         </div>
       </div>
 
@@ -141,7 +138,6 @@
       </div>
     </section>
 
-    <!-- AD ZONE: Rectangle -->
     <div class="donate-zone" id="donate-middle">
       <p class="donate-text">☕ ¿AudioLocal te fue útil? Invitame un café</p>
       <a href="https://ko-fi.com/audiolocal" target="_blank" rel="noopener" class="btn-kofi">
@@ -150,7 +146,6 @@
       </a>
     </div>
 
-    <!-- PREVIEW CARD -->
     <section class="card preview-section" id="previewSection" hidden>
       <div class="preview-header">
         <span class="preview-title">Resultado</span>
@@ -168,6 +163,27 @@
         <div class="preview-box">
           <div class="preview-box-header">Audio convertido <span class="size-badge" id="convertedSize">—</span></div>
           <div class="svg-preview" id="convertedPreview"></div>
+        </div>
+      </div>
+
+      <div class="preview-metadata" id="previewMetadata">
+        <div class="metadata-column">
+          <div class="meta-title">Datos originales</div>
+          <ul class="meta-list">
+            <li><strong>Formato:</strong> <span id="origFormatPreview">—</span></li>
+            <li><strong>Duración:</strong> <span id="origDuration">—</span></li>
+            <li><strong>Muestreo:</strong> <span id="origSampleRate">—</span></li>
+            <li><strong>Canales:</strong> <span id="origChannels">—</span></li>
+          </ul>
+        </div>
+        <div class="metadata-column">
+          <div class="meta-title">Audio convertido</div>
+          <ul class="meta-list">
+            <li><strong>Formato:</strong> <span id="convertedFormat">—</span></li>
+            <li><strong>Muestreo:</strong> <span id="convertedSampleRate">—</span></li>
+            <li><strong>Canales:</strong> <span id="convertedChannels">—</span></li>
+            <li><strong>Tamaño:</strong> <span id="convertedSizePreview">—</span></li>
+          </ul>
         </div>
       </div>
 
@@ -193,7 +209,6 @@
       </div>
     </section>
 
-    <!-- SEO CONTENT + FAQ -->
     <section class="seo-content card">
       <h2>¿Cómo convertir audio gratis y sin perder calidad?</h2>
       <p>AudioLocal es un convertidor que trabaja completamente en tu navegador utilizando tecnologías modernas como
@@ -219,7 +234,6 @@
     </section>
   </main>
 
-  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">AudioLocal</div>
@@ -233,10 +247,7 @@
       </p>
     </div>
   </footer>
-
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <!-- Scripts -->
   <script src="js/navbar.js"></script>
   <script src="js/converter.js"></script>
 </body>

@@ -17,8 +17,24 @@ const modeSelect = document.getElementById("mode");
 const colorsSelect = document.getElementById("colors");
 const smoothInput = document.getElementById("smooth");
 const normalizeSelect = document.getElementById("normalizeSelect");
+const keepSampleRateCheckbox = document.getElementById("keepSampleRate");
+const outputEstimateLabel = document.getElementById("outputEstimate");
 const origSize = document.getElementById("origSize");
 const convertedSize = document.getElementById("convertedSize");
+const fileSummary = document.getElementById("fileSummary");
+const fileNameLabel = document.getElementById("fileName");
+const fileDurationLabel = document.getElementById("fileDuration");
+const fileSampleRateLabel = document.getElementById("fileSampleRate");
+const fileChannelsLabel = document.getElementById("fileChannels");
+const origFormatLabel = document.getElementById("origFormat");
+const origFormatPreview = document.getElementById("origFormatPreview");
+const origDurationPreview = document.getElementById("origDuration");
+const origSampleRatePreview = document.getElementById("origSampleRate");
+const origChannelsPreview = document.getElementById("origChannels");
+const convertedFormatLabel = document.getElementById("convertedFormat");
+const convertedSampleRateLabel = document.getElementById("convertedSampleRate");
+const convertedChannelsLabel = document.getElementById("convertedChannels");
+const convertedSizePreview = document.getElementById("convertedSizePreview");
 const toast = document.getElementById("toast");
 
 let selectedFile = null;
@@ -48,6 +64,88 @@ const SUPPORTED_AUDIO_TYPES = [
   "audio/aac",
   "audio/x-aac",
 ];
+
+const SUPPORTED_FILE_EXTENSIONS = ["mp3", "wav", "ogg", "aac", "m4a"];
+const SETTINGS_STORE = "audiolocal-settings";
+
+function getFileExtension(file) {
+  const match = file.name && file.name.match(/\.([^.]+)$/i);
+  return match ? match[1].toLowerCase() : "";
+}
+
+function isSupportedAudioFile(file) {
+  if (!file) return false;
+  if (file.type && SUPPORTED_AUDIO_TYPES.includes(file.type.toLowerCase())) return true;
+  const ext = getFileExtension(file);
+  return SUPPORTED_FILE_EXTENSIONS.includes(ext);
+}
+
+function saveSettings() {
+  const settings = {
+    mode: modeSelect.value,
+    colors: colorsSelect.value,
+    smooth: smoothInput.value,
+    normalize: normalizeSelect.value,
+    keepSampleRate: keepSampleRateCheckbox.checked,
+  };
+  localStorage.setItem(SETTINGS_STORE, JSON.stringify(settings));
+}
+
+function loadSettings() {
+  try {
+    const stored = localStorage.getItem(SETTINGS_STORE);
+    if (!stored) return;
+    const settings = JSON.parse(stored);
+    if (settings.mode) modeSelect.value = settings.mode;
+    if (settings.colors) colorsSelect.value = settings.colors;
+    if (settings.smooth) smoothInput.value = settings.smooth;
+    if (settings.normalize) normalizeSelect.value = settings.normalize;
+    if (typeof settings.keepSampleRate === "boolean")
+      keepSampleRateCheckbox.checked = settings.keepSampleRate;
+  } catch (err) {
+    console.warn("No se pudieron cargar las preferencias guardadas:", err);
+  }
+}
+
+function estimateOutputBytes() {
+  if (!selectedBuffer) return 0;
+  const formatKey = modeSelect.value;
+  const formatInfo = FORMAT_MAP[formatKey] ?? FORMAT_MAP.wav;
+  const duration = selectedBuffer.duration;
+  if (formatInfo.bitrate) {
+    return Math.max(0, Math.round((duration * formatInfo.bitrate * 1000) / 8));
+  }
+
+  const sampleRate = keepSampleRateCheckbox.checked
+    ? selectedBuffer.sampleRate
+    : Number(smoothInput.value);
+  const channels = Number(colorsSelect.value);
+  return Math.max(0, Math.round(duration * sampleRate * channels * 2));
+}
+
+function updateOutputEstimate() {
+  if (!outputEstimateLabel) return;
+  if (!selectedBuffer) {
+    outputEstimateLabel.textContent = "—";
+    return;
+  }
+
+  const bytes = estimateOutputBytes();
+  const formatKey = modeSelect.value;
+  const formatInfo = FORMAT_MAP[formatKey] ?? FORMAT_MAP.wav;
+  const label = `${formatInfo.ext.toUpperCase()} ≈ ${formatBytes(bytes)}`;
+  outputEstimateLabel.textContent = label;
+}
+
+function toggleSampleRateControl() {
+  if (!smoothInput || !keepSampleRateCheckbox) return;
+  smoothInput.disabled = keepSampleRateCheckbox.checked;
+  if (keepSampleRateCheckbox.checked) {
+    smoothInput.parentElement.classList.add("disabled");
+  } else {
+    smoothInput.parentElement.classList.remove("disabled");
+  }
+}
 
 // Carga lamejs dinámicamente si no está disponible
 let lamejsLoading = null;
@@ -92,23 +190,6 @@ function getFileFormatLabel(file) {
   return m ? m[1].toUpperCase() : "Desconocido";
 }
 
-function updateInputFormatBadge(label) {
-  let badge = document.getElementById("inputFormatBadge");
-  if (!badge) {
-    badge = document.createElement("span");
-    badge.id = "inputFormatBadge";
-    badge.className = "input-format-badge";
-    // insert after the mode select
-    modeSelect.parentElement.appendChild(badge);
-  }
-  badge.textContent = `Entrada: ${label}`;
-}
-
-function clearInputFormatBadge() {
-  const badge = document.getElementById("inputFormatBadge");
-  if (badge && badge.parentElement) badge.parentElement.removeChild(badge);
-}
-
 // Formatos disponibles: value → { label, ext, bitrate (solo MP3) }
 // El HTML debe tener en #mode:
 //   <option value="wav">WAV</option>
@@ -129,6 +210,56 @@ function formatBytes(bytes) {
   const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / k ** i).toFixed(1)) + " " + sizes[i];
+}
+
+function formatDuration(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const secs = Math.round(seconds % 60);
+  return `${minutes}:${secs.toString().padStart(2, "0")} min`;
+}
+
+function updateFileSummary(file, audioBuffer) {
+  if (!fileSummary) return;
+  fileSummary.hidden = false;
+  fileNameLabel.textContent = file.name;
+  fileDurationLabel.textContent = formatDuration(audioBuffer.duration);
+  fileSampleRateLabel.textContent = `${audioBuffer.sampleRate.toLocaleString()} Hz`;
+  fileChannelsLabel.textContent = audioBuffer.numberOfChannels === 1 ? "Mono" : "Estéreo";
+  origFormatLabel.textContent = getFileFormatLabel(file);
+}
+
+function updatePreviewMetadata(data) {
+  if (!origFormatPreview) return;
+  origFormatPreview.textContent = data.origFormat;
+  origDurationPreview.textContent = data.duration;
+  origSampleRatePreview.textContent = data.sampleRate;
+  origChannelsPreview.textContent = data.channels;
+  convertedFormatLabel.textContent = data.convertedFormat;
+  convertedSampleRateLabel.textContent = data.convertedSampleRate;
+  convertedChannelsLabel.textContent = data.convertedChannels;
+  convertedSizePreview.textContent = data.convertedSize;
+}
+
+function resetFileSummary() {
+  if (!fileSummary) return;
+  fileSummary.hidden = true;
+  fileNameLabel.textContent = "—";
+  fileDurationLabel.textContent = "—";
+  fileSampleRateLabel.textContent = "—";
+  fileChannelsLabel.textContent = "—";
+  origFormatLabel.textContent = "—";
+}
+
+function resetPreviewMetadata() {
+  if (!convertedFormatLabel) return;
+  origFormatPreview.textContent = "—";
+  origDurationPreview.textContent = "—";
+  origSampleRatePreview.textContent = "—";
+  origChannelsPreview.textContent = "—";
+  convertedFormatLabel.textContent = "—";
+  convertedSampleRateLabel.textContent = "—";
+  convertedChannelsLabel.textContent = "—";
+  convertedSizePreview.textContent = "—";
 }
 
 function showToast(message, type = "info") {
@@ -295,6 +426,11 @@ async function resampleAudioBuffer(audioBuffer, targetSampleRate) {
     newLength,
     targetSampleRate,
   );
+  if (offlineCtx.sampleRate !== targetSampleRate) {
+    console.warn(
+      `OfflineAudioContext no admite ${targetSampleRate} Hz, usando ${offlineCtx.sampleRate} Hz en su lugar.`,
+    );
+  }
   const source = offlineCtx.createBufferSource();
   source.buffer = audioBuffer;
   source.connect(offlineCtx.destination);
@@ -343,11 +479,13 @@ async function convertAudio() {
     // Validar sample rate
     const rawSampleRate = Number(smoothInput.value);
     const validSampleRates = [8000, 11025, 16000, 22050, 44100, 48000, 96000];
-    const sampleRate = validSampleRates.includes(rawSampleRate)
+    const sampleRate = keepSampleRateCheckbox.checked
+      ? selectedBuffer.sampleRate
+      : validSampleRates.includes(rawSampleRate)
       ? rawSampleRate
       : selectedBuffer.sampleRate;
 
-    if (!validSampleRates.includes(rawSampleRate)) {
+    if (!keepSampleRateCheckbox.checked && !validSampleRates.includes(rawSampleRate)) {
       showToast(`Sample rate inválido, usando ${sampleRate} Hz`, "warning");
     }
 
@@ -395,7 +533,16 @@ async function convertAudio() {
       convertedBlob = encodeWAV(buffer);
     }
 
-    showResult();
+    showResult(buffer, {
+      origFormat: getFileFormatLabel(selectedFile),
+      duration: formatDuration(selectedBuffer.duration),
+      sampleRate: `${selectedBuffer.sampleRate.toLocaleString()} Hz`,
+      channels: selectedBuffer.numberOfChannels === 1 ? "Mono" : "Estéreo",
+      convertedFormat: formatInfo.ext.toUpperCase(),
+      convertedSampleRate: `${buffer.sampleRate.toLocaleString()} Hz`,
+      convertedChannels: options.channels === 1 ? "Mono" : "Estéreo",
+      convertedSize: formatBytes(convertedBlob.size),
+    });
   } catch (error) {
     console.error(error);
     showToast("Error durante la conversión: " + error.message, "error");
@@ -407,6 +554,7 @@ async function convertAudio() {
 function showProgress() {
   progressWrap.hidden = false;
   updateProgress(0, "Iniciando conversión...");
+  progressWrap.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function updateProgress(percent, text) {
@@ -418,9 +566,12 @@ function hideProgress() {
   setTimeout(() => (progressWrap.hidden = true), 600);
 }
 
-function showResult() {
+function showResult(buffer, meta = {}) {
   if (currentConvertedUrl) URL.revokeObjectURL(currentConvertedUrl);
   currentConvertedUrl = URL.createObjectURL(convertedBlob);
+  if (meta && Object.keys(meta).length) {
+    updatePreviewMetadata(meta);
+  }
 
   convertedPreview.innerHTML = "";
   const audioEl = document.createElement("audio");
@@ -435,13 +586,18 @@ function showResult() {
   updateProgress(100, "¡Conversión completada!");
   hideProgress();
   setBusy(false);
+  
+  setTimeout(() => previewSection.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
 }
 
 // ==================== MANEJO DE ARCHIVOS ====================
 function handleFile(file) {
   if (!file) return showToast("Selecciona un archivo de audio", "error");
-  if (!file.type || !file.type.startsWith("audio/")) {
-    return showToast("Archivo de audio no válido", "error");
+  if (!isSupportedAudioFile(file)) {
+    return showToast(
+      "Archivo de audio no válido. Usa MP3, WAV, OGG, AAC o M4A.",
+      "error",
+    );
   }
   if (file.size > MAX_FILE_SIZE) {
     return showToast("El archivo es demasiado grande. Usa uno menor a 150 MB.", "error");
@@ -489,12 +645,8 @@ function handleFile(file) {
       origPreview.src = currentOriginalUrl;
       origSize.textContent = formatBytes(file.size);
       btnConvert.disabled = false;
-      // actualiza badge de formato de entrada
-      try {
-        updateInputFormatBadge(getFileFormatLabel(file));
-      } catch (e) {
-        console.warn('No se pudo actualizar el badge de formato:', e);
-      }
+      updateFileSummary(file, selectedBuffer);
+      updateOutputEstimate();
 
       // Toast de éxito con nombre del archivo
       showToast(`✓ ${file.name} cargado correctamente`, "success");
@@ -531,7 +683,9 @@ function resetForm() {
   btnConvert.disabled = true;
   btnDownload.disabled = true;
   resetPreview();
-  clearInputFormatBadge();
+  resetFileSummary();
+  resetPreviewMetadata();
+  updateOutputEstimate();
   setBusy(false);
   showToast("Formulario reiniciado", "info");
 }
@@ -561,6 +715,20 @@ btnDownload.addEventListener("click", () => {
 });
 
 btnReset.addEventListener("click", resetForm);
+
+[modeSelect, colorsSelect, smoothInput, normalizeSelect, keepSampleRateCheckbox].forEach((element) => {
+  if (!element) return;
+  element.addEventListener("change", () => {
+    toggleSampleRateControl();
+    saveSettings();
+    updateOutputEstimate();
+  });
+});
+
+loadSettings();
+toggleSampleRateControl();
+updateOutputEstimate();
+
 // no hay input range; el select se usa directamente
 btnDownload.disabled = true;
 

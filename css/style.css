@@ -374,6 +374,78 @@ h1 {
     margin: 0 2px;
 }
 
+.file-summary,
+.preview-metadata {
+    margin-bottom: 22px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.file-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(130px, 1fr));
+    gap: 12px 24px;
+    margin-top: 22px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+.summary-row.full-width {
+    grid-column: 1 / -1;
+}
+
+.summary-row strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.preview-metadata {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.metadata-column {
+    display: grid;
+    gap: 10px;
+}
+
+.meta-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--accent2);
+}
+
+.meta-list {
+    list-style: none;
+    display: grid;
+    gap: 12px;
+    padding: 0;
+    margin: 0;
+}
+
+.meta-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 0.86rem;
+}
+
+.meta-list strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
 /* ---------- Settings ---------- */
 .settings-grid {
     display: grid;
@@ -393,16 +465,35 @@ h1 {
     margin-bottom: 8px;
 }
 
-.input-format-badge {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(85, 216, 255, 0.12);
-    color: var(--accent2);
-    font-size: 0.78rem;
-    font-weight: 700;
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    gap: 15px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    cursor: pointer;
 }
+
+.checkbox-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent2);
+}
+
+.checkbox-group input p {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+}
+
+.setting-group.disabled {
+    opacity: 0.66;
+}
+
 
 select {
     width: 100%;
@@ -830,6 +921,11 @@ input[type="range"]::-webkit-slider-thumb {
     }
 
     .preview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .preview-metadata,
+    .file-summary {
         grid-template-columns: 1fr;
     }
 
