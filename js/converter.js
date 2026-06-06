@@ -45,27 +45,37 @@ let convertedFormat = "wav";
 let audioContext = null;
 function getAudioContext() {
   if (!audioContext || audioContext.state === "closed") {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    audioContext = new AudioCtor();
   }
   return audioContext;
+}
+
+function getOfflineAudioContext(channels, length, sampleRate) {
+  const OfflineCtor = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  return new OfflineCtor(channels, length, sampleRate);
 }
 
 let currentOriginalUrl = null;
 let currentConvertedUrl = null;
 
 const MAX_FILE_SIZE = 150 * 1024 * 1024; // 150 MB
-const LAME_SCRIPT_URL = "js/lame.min.js";
+const PLACEHOLDER_TEXT = "—";
 const SUPPORTED_AUDIO_TYPES = [
   "audio/wav",
   "audio/x-wav",
   "audio/mpeg",
   "audio/mp3",
   "audio/ogg",
+  "audio/opus",
+  "audio/webm",
   "audio/aac",
   "audio/x-aac",
+  "audio/mp4",
+  "audio/x-m4a",
 ];
 
-const SUPPORTED_FILE_EXTENSIONS = ["mp3", "wav", "ogg", "aac", "m4a"];
+const SUPPORTED_FILE_EXTENSIONS = ["mp3", "wav", "ogg", "aac", "m4a", "webm"];
 const SETTINGS_STORE = "audiolocal-settings";
 
 function getFileExtension(file) {
@@ -107,6 +117,35 @@ function loadSettings() {
   }
 }
 
+function updateAvailableFormats() {
+  if (!modeSelect) return;
+  Array.from(modeSelect.options).forEach((option) => {
+    option.disabled = !isOutputFormatSupported(option.value);
+  });
+  if (modeSelect.options[modeSelect.selectedIndex]?.disabled) {
+    modeSelect.value = "wav";
+  }
+}
+
+const FORMAT_MAP = {
+  wav: { ext: "wav", type: "wav", bitrate: null },
+  mp3_128: { ext: "mp3", type: "mp3", bitrate: 128 },
+  mp3_256: { ext: "mp3", type: "mp3", bitrate: 256 },
+  mp3_320: { ext: "mp3", type: "mp3", bitrate: 320 },
+  ogg: {
+    ext: "ogg",
+    type: "ogg",
+    bitrate: 128,
+    mimeCandidates: ["audio/ogg; codecs=opus", "audio/ogg"],
+  },
+  aac: {
+    ext: "m4a",
+    type: "aac",
+    bitrate: 128,
+    mimeCandidates: ["audio/mp4; codecs=mp4a.40.2", "audio/x-m4a", "audio/aac"],
+  },
+};
+
 function estimateOutputBytes() {
   if (!selectedBuffer) return 0;
   const formatKey = modeSelect.value;
@@ -126,14 +165,15 @@ function estimateOutputBytes() {
 function updateOutputEstimate() {
   if (!outputEstimateLabel) return;
   if (!selectedBuffer) {
-    outputEstimateLabel.textContent = "—";
+    outputEstimateLabel.textContent = PLACEHOLDER_TEXT;
     return;
   }
 
   const bytes = estimateOutputBytes();
   const formatKey = modeSelect.value;
   const formatInfo = FORMAT_MAP[formatKey] ?? FORMAT_MAP.wav;
-  const label = `${formatInfo.ext.toUpperCase()} ≈ ${formatBytes(bytes)}`;
+  const formatLabel = formatInfo.type === "aac" ? "AAC" : formatInfo.ext.toUpperCase();
+  const label = `${formatLabel} ≈ ${formatBytes(bytes)}`;
   outputEstimateLabel.textContent = label;
 }
 
@@ -145,24 +185,6 @@ function toggleSampleRateControl() {
   } else {
     smoothInput.parentElement.classList.remove("disabled");
   }
-}
-
-// Carga lamejs dinámicamente si no está disponible
-let lamejsLoading = null;
-async function ensureLamejs() {
-  if (typeof lamejs !== "undefined") return true;
-  if (lamejsLoading) return lamejsLoading;
-
-  lamejsLoading = new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = LAME_SCRIPT_URL;
-    script.async = true;
-    script.onload = () => resolve(typeof lamejs !== "undefined");
-    script.onerror = () => resolve(false);
-    document.head.appendChild(script);
-  });
-
-  return lamejsLoading;
 }
 
 function setBusy(isBusy) {
@@ -184,7 +206,7 @@ function getFileFormatLabel(file) {
   if (t.includes("mpeg") || t.includes("mp3")) return "MP3";
   if (t.includes("wav")) return "WAV";
   if (t.includes("ogg")) return "OGG";
-  if (t.includes("aac")) return "AAC";
+  if (t.includes("aac") || t.includes("mp4") || t.includes("m4a")) return "AAC";
   // fallback to extension
   const m = file.name && file.name.match(/\.([a-z0-9]+)$/i);
   return m ? m[1].toUpperCase() : "Desconocido";
@@ -196,12 +218,6 @@ function getFileFormatLabel(file) {
 //   <option value="mp3_128">MP3 128 kbps</option>
 //   <option value="mp3_256">MP3 256 kbps</option>
 //   <option value="mp3_320">MP3 320 kbps</option>
-const FORMAT_MAP = {
-  wav: { ext: "wav", bitrate: null },
-  mp3_128: { ext: "mp3", bitrate: 128 },
-  mp3_256: { ext: "mp3", bitrate: 256 },
-  mp3_320: { ext: "mp3", bitrate: 320 },
-};
 
 // ==================== UTILIDADES ====================
 function formatBytes(bytes) {
@@ -243,23 +259,23 @@ function updatePreviewMetadata(data) {
 function resetFileSummary() {
   if (!fileSummary) return;
   fileSummary.hidden = true;
-  fileNameLabel.textContent = "—";
-  fileDurationLabel.textContent = "—";
-  fileSampleRateLabel.textContent = "—";
-  fileChannelsLabel.textContent = "—";
-  origFormatLabel.textContent = "—";
+  fileNameLabel.textContent = PLACEHOLDER_TEXT;
+  fileDurationLabel.textContent = PLACEHOLDER_TEXT;
+  fileSampleRateLabel.textContent = PLACEHOLDER_TEXT;
+  fileChannelsLabel.textContent = PLACEHOLDER_TEXT;
+  origFormatLabel.textContent = PLACEHOLDER_TEXT;
 }
 
 function resetPreviewMetadata() {
   if (!convertedFormatLabel) return;
-  origFormatPreview.textContent = "—";
-  origDurationPreview.textContent = "—";
-  origSampleRatePreview.textContent = "—";
-  origChannelsPreview.textContent = "—";
-  convertedFormatLabel.textContent = "—";
-  convertedSampleRateLabel.textContent = "—";
-  convertedChannelsLabel.textContent = "—";
-  convertedSizePreview.textContent = "—";
+  origFormatPreview.textContent = PLACEHOLDER_TEXT;
+  origDurationPreview.textContent = PLACEHOLDER_TEXT;
+  origSampleRatePreview.textContent = PLACEHOLDER_TEXT;
+  origChannelsPreview.textContent = PLACEHOLDER_TEXT;
+  convertedFormatLabel.textContent = PLACEHOLDER_TEXT;
+  convertedSampleRateLabel.textContent = PLACEHOLDER_TEXT;
+  convertedChannelsLabel.textContent = PLACEHOLDER_TEXT;
+  convertedSizePreview.textContent = PLACEHOLDER_TEXT;
 }
 
 function showToast(message, type = "info") {
@@ -330,11 +346,10 @@ function encodeWAV(audioBuffer) {
   return new Blob([buffer], { type: "audio/wav" });
 }
 
-// MP3 con bitrate configurable via lamejs
+// MP3 con bitrate configurable vía lamejs local
 async function encodeMP3(audioBuffer, bitrate = 128) {
-  const loaded = await ensureLamejs();
-  if (!loaded || typeof lamejs === "undefined") {
-    showToast("No se pudo cargar el codificador MP3. Usando WAV.", "warning");
+  if (typeof lamejs === "undefined") {
+    showToast("No se encontró el codificador MP3. Usando WAV.", "warning");
     convertedFormat = "wav";
     return encodeWAV(audioBuffer);
   }
@@ -355,7 +370,6 @@ async function encodeMP3(audioBuffer, bitrate = 128) {
       const end = Math.min(start + blockSize, left.length);
       const size = end - start;
 
-      // Crear chunks del tamaño exacto del fragmento, no de blockSize
       const leftChunk = new Int16Array(size);
       const rightChunk = new Int16Array(size);
 
@@ -367,7 +381,6 @@ async function encodeMP3(audioBuffer, bitrate = 128) {
       const mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
       if (mp3buf.length > 0) mp3Data.push(new Uint8Array(mp3buf));
 
-      // Ceder el hilo cada 100 bloques para no crashear
       if (b % 100 === 0) {
         const percent = 80 + Math.floor((b / totalBlocks) * 15);
         updateProgress(
@@ -391,6 +404,66 @@ async function encodeMP3(audioBuffer, bitrate = 128) {
 }
 
 // ==================== PROCESAMIENTO DE AUDIO ====================
+function getSupportedMediaMime(formatInfo) {
+  if (!formatInfo?.mimeCandidates || typeof MediaRecorder === "undefined") return null;
+  return formatInfo.mimeCandidates.find((mime) => MediaRecorder.isTypeSupported(mime)) || null;
+}
+
+function isOutputFormatSupported(formatKey) {
+  const formatInfo = FORMAT_MAP[formatKey];
+  if (!formatInfo) return false;
+  if (formatInfo.type === "wav" || formatInfo.type === "mp3") return true;
+  return Boolean(getSupportedMediaMime(formatInfo));
+}
+
+async function encodeWithMediaRecorder(audioBuffer, mimeType) {
+  const ctx = getAudioContext();
+  await ctx.resume();
+
+  const destination = ctx.createMediaStreamDestination();
+  const source = ctx.createBufferSource();
+  source.buffer = audioBuffer;
+  source.connect(destination);
+  source.start(0);
+
+  const recorder = new MediaRecorder(destination.stream, { type: mimeType });
+  const chunks = [];
+
+  return new Promise((resolve, reject) => {
+    let stopped = false;
+
+    recorder.ondataavailable = (event) => {
+      if (event.data && event.data.size) chunks.push(event.data);
+    };
+
+    recorder.onerror = (event) => reject(event.error || new Error("Error de MediaRecorder"));
+
+    recorder.onstop = () => {
+      stopped = true;
+      source.disconnect();
+      destination.disconnect();
+      resolve(new Blob(chunks, { type: mimeType }));
+    };
+
+    source.onended = () => {
+      if (recorder.state === "recording") recorder.stop();
+    };
+
+    recorder.start();
+    setTimeout(() => {
+      if (!stopped && recorder.state === "recording") recorder.stop();
+    }, audioBuffer.duration * 1000 + 1200);
+  });
+}
+
+async function encodeMediaFormat(audioBuffer, formatInfo) {
+  if (formatInfo.type === "wav") return encodeWAV(audioBuffer);
+  if (formatInfo.type === "mp3") return encodeMP3(audioBuffer, formatInfo.bitrate);
+  const mimeType = getSupportedMediaMime(formatInfo);
+  if (!mimeType) return null;
+  return await encodeWithMediaRecorder(audioBuffer, mimeType);
+}
+
 function normalizeBuffer(audioBuffer) {
   const numChannels = audioBuffer.numberOfChannels;
   let peak = 0;
@@ -467,6 +540,26 @@ function convertChannels(audioBuffer, targetChannels) {
 }
 
 // ==================== CONVERSIÓN PRINCIPAL ====================
+function getConversionOptions() {
+  const rawSampleRate = Number(smoothInput.value);
+  const validSampleRates = [8000, 11025, 16000, 22050, 44100, 48000, 96000];
+  const sampleRate = keepSampleRateCheckbox.checked
+    ? selectedBuffer.sampleRate
+    : validSampleRates.includes(rawSampleRate)
+    ? rawSampleRate
+    : selectedBuffer.sampleRate;
+
+  return {
+    formatKey: modeSelect.value,
+    formatInfo: FORMAT_MAP[modeSelect.value] ?? FORMAT_MAP.wav,
+    channels: Number(colorsSelect.value),
+    sampleRate,
+    normalize: normalizeSelect ? normalizeSelect.value === "1" : false,
+    sampleRateWarning:
+      !keepSampleRateCheckbox.checked && !validSampleRates.includes(rawSampleRate),
+  };
+}
+
 async function convertAudio() {
   if (!selectedBuffer)
     return showToast("Selecciona un archivo primero", "error");
@@ -476,60 +569,57 @@ async function convertAudio() {
     showProgress();
     updateProgress(15, "Procesando audio...");
 
-    // Validar sample rate
-    const rawSampleRate = Number(smoothInput.value);
-    const validSampleRates = [8000, 11025, 16000, 22050, 44100, 48000, 96000];
-    const sampleRate = keepSampleRateCheckbox.checked
-      ? selectedBuffer.sampleRate
-      : validSampleRates.includes(rawSampleRate)
-      ? rawSampleRate
-      : selectedBuffer.sampleRate;
+    const options = getConversionOptions();
+    let activeFormatInfo = options.formatInfo;
 
-    if (!keepSampleRateCheckbox.checked && !validSampleRates.includes(rawSampleRate)) {
-      showToast(`Sample rate inválido, usando ${sampleRate} Hz`, "warning");
+    if (options.sampleRateWarning) {
+      showToast(`Sample rate inválido, usando ${options.sampleRate} Hz`, "warning");
     }
 
-    const formatKey = modeSelect.value;
-    const formatInfo = FORMAT_MAP[formatKey] ?? FORMAT_MAP["wav"];
-
-    const options = {
-      formatKey,
-      formatInfo,
-      channels: Number(colorsSelect.value),
-      sampleRate,
-      normalize: normalizeSelect ? normalizeSelect.value === "1" : false,
-    };
+    if (!isOutputFormatSupported(options.formatKey)) {
+      showToast(
+        `El formato ${activeFormatInfo.type.toUpperCase()} no está disponible en este navegador. Se usará WAV.`,
+        "warning",
+      );
+      activeFormatInfo = FORMAT_MAP.wav;
+    }
 
     let buffer = selectedBuffer;
     const ctx = getAudioContext();
     await ctx.resume();
 
     if (options.normalize) {
-      updateProgress(35, "Normalizando volumen...");
+      updateProgress(30, "Normalizando volumen...");
       buffer = normalizeBuffer(buffer);
     }
 
     if (buffer.sampleRate !== options.sampleRate) {
-      updateProgress(50, `Remuestreando a ${options.sampleRate} Hz...`);
+      updateProgress(45, `Remuestreando a ${options.sampleRate} Hz...`);
       buffer = await resampleAudioBuffer(buffer, options.sampleRate);
     }
 
     if (buffer.numberOfChannels !== options.channels) {
       updateProgress(
-        65,
+        55,
         `Convirtiendo a ${options.channels === 1 ? "Mono" : "Estéreo"}...`,
       );
       buffer = convertChannels(buffer, options.channels);
     }
 
-    convertedFormat = formatInfo.ext;
-    updateProgress(80, `Codificando ${formatKey.toUpperCase()}...`);
+    convertedFormat = activeFormatInfo.ext;
+    updateProgress(
+      70,
+      `Codificando ${activeFormatInfo.type === "aac" ? "AAC" : activeFormatInfo.ext.toUpperCase()}...`,
+    );
 
-    if (formatInfo.bitrate !== null) {
-      // Cualquier variante de MP3
-      convertedBlob = await encodeMP3(buffer, formatInfo.bitrate);
-    } else {
-      // WAV
+    convertedBlob = await encodeMediaFormat(buffer, activeFormatInfo);
+    if (!convertedBlob) {
+      showToast(
+        `No se pudo codificar a ${activeFormatInfo.type.toUpperCase()}. Se generará WAV.`,
+        "warning",
+      );
+      activeFormatInfo = FORMAT_MAP.wav;
+      convertedFormat = activeFormatInfo.ext;
       convertedBlob = encodeWAV(buffer);
     }
 
@@ -538,7 +628,10 @@ async function convertAudio() {
       duration: formatDuration(selectedBuffer.duration),
       sampleRate: `${selectedBuffer.sampleRate.toLocaleString()} Hz`,
       channels: selectedBuffer.numberOfChannels === 1 ? "Mono" : "Estéreo",
-      convertedFormat: formatInfo.ext.toUpperCase(),
+      convertedFormat:
+        activeFormatInfo.type === "aac"
+          ? "AAC"
+          : activeFormatInfo.ext.toUpperCase(),
       convertedSampleRate: `${buffer.sampleRate.toLocaleString()} Hz`,
       convertedChannels: options.channels === 1 ? "Mono" : "Estéreo",
       convertedSize: formatBytes(convertedBlob.size),
@@ -679,7 +772,7 @@ function resetForm() {
   selectedBuffer = null;
   fileInput.value = "";
   origPreview.src = "";
-  origSize.textContent = "—";
+  origSize.textContent = PLACEHOLDER_TEXT;
   btnConvert.disabled = true;
   btnDownload.disabled = true;
   resetPreview();
@@ -726,6 +819,7 @@ btnReset.addEventListener("click", resetForm);
 });
 
 loadSettings();
+updateAvailableFormats();
 toggleSampleRateControl();
 updateOutputEstimate();
 

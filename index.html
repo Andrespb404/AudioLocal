@@ -2,20 +2,31 @@
 <html lang="es">
 
 <head>
-  <title>AudioLocal | Convertidor de audio local, rápido y privado</title>
+  <title>AudioLocal | Convertidor de audio local y privado</title>
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta property="og:title" content="AudioLocal | Convertidor de audio local, rápido y privado" />
-  <meta property="og:url" content="https://audiolocal.app/" />
-  <meta property="og:description"
-    content="Procesa audio en el navegador sin subir archivos. Privacidad total, compatibilidad moderna y descarga instantánea." />
+  <meta name="robots" content="index,follow" />
   <meta name="description"
-    content="Convierte MP3, WAV y otros formatos directamente en tu navegador. 100% local, sin subida de archivos y sin registro." />
-  <meta property="og:image" content="assets/audiolocal_og.png" />
+    content="AudioLocal es un convertidor de audio local que convierte MP3, WAV, OGG y AAC directamente en tu navegador. Sin subir archivos, sin registro y con privacidad total." />
+  <meta name="keywords" content="convertidor de audio, convertidor de audio local, convertir audio, mp3 a wav, ogg a mp3" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:title" content="AudioLocal | Convertidor de audio local y privado" />
+  <meta property="og:description"
+    content="AudioLocal es un convertidor de audio en el navegador que procesa MP3, WAV, OGG y AAC sin subir archivos. Privacidad total y descarga instantánea." />
+  <meta property="og:url" content="https://audiolocal.app/" />
+  <meta property="og:image" content="https://audiolocal.app/assets/audiolocal_og.png" />
+  <meta property="og:image:alt" content="Logo de AudioLocal, convertidor de audio local" />
   <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AudioLocal | Convertidor de audio local y privado" />
+  <meta name="twitter:description"
+    content="AudioLocal es un convertidor de audio que transforma MP3, WAV, OGG y AAC en el navegador. Sin servidores, sin registro y con privacidad total." />
+  <meta name="twitter:image" content="https://audiolocal.app/assets/audiolocal_og.png" />
+  <meta name="theme-color" content="#111827" />
 
   <link rel="canonical" href="https://audiolocal.app/" />
+  <link rel="alternate" href="https://audiolocal.app/" hreflang="es" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,7 +35,15 @@
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap"
     rel="stylesheet" />
 
-  <script src="js/lame.min.js"></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "AudioLocal",
+    "url": "https://audiolocal.app/",
+    "description": "Convertidor de audio local que procesa MP3, WAV, OGG y AAC directamente en el navegador sin subir archivos."
+  }
+  </script>
 
 </head>
 
@@ -52,7 +71,7 @@
       <div class="logo-badge">AudioLocal</div>
       <h1>Convertidor de Audio<br><span class="highlight">100% Local</span></h1>
       <p class="subtitle">
-        Transformá MP3, WAV y otros formatos<br>
+        AudioLocal es un convertidor de audio gratuito que procesa MP3, WAV y otros formatos<br>
         directamente en tu navegador. Sin servidores • Sin registro • Privacidad total.
       </p>
       <div class="hero-badges">
@@ -90,6 +109,8 @@
             <option value="mp3_128">MP3 128 kbps</option>
             <option value="mp3_256">MP3 256 kbps</option>
             <option value="mp3_320">MP3 320 kbps</option>
+            <option value="ogg">OGG (Opus)</option>
+            <option value="aac">AAC</option>
           </select>
 
         </div>
@@ -213,6 +234,11 @@
       <h2>¿Cómo convertir audio gratis y sin perder calidad?</h2>
       <p>AudioLocal es un convertidor que trabaja completamente en tu navegador utilizando tecnologías modernas como
         WebAssembly. Esto significa que tu privacidad está protegida y la conversión es mucho más rápida.</p>
+      <ul>
+        <li>Convierte MP3, WAV, OGG o AAC localmente sin subir tus archivos a ningún servidor.</li>
+        <li>Sin registro, sin cuentas y sin transferencia de datos personales.</li>
+        <li>Ideal para podcasters, creadores y usuarios que buscan una herramienta de audio rápida y privada.</li>
+      </ul>
 
       <h3>¿Por qué convertir a WAV?</h3>
       <p>El formato WAV es ideal para edición profesional, ya que es lossless (sin pérdida de calidad). Perfecto para
@@ -249,6 +275,7 @@
   </footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="js/navbar.js"></script>
+  <script src="js/lame.min.js"></script>
   <script src="js/converter.js"></script>
 </body>
 
