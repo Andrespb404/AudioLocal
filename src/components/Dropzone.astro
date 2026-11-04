@@ -1,0 +1,74 @@
+<section class="dropzone enter enter-1" id="dropzone" aria-label="Agregar archivos">
+  <p class="dropzone-title" id="dropzoneTitle">Arrastra tus archivos aquí</p>
+  <button type="button" class="btn btn-primary dropzone-btn" id="btnBrowse">Elegir archivos</button>
+  <p class="dropzone-meta">MP3, WAV, OGG, AAC o M4A · hasta 150 MB y 20 minutos por archivo</p>
+</section>
+<p class="trust enter enter-2" id="trustLine">Todo ocurre en tu navegador. Sin registro y gratis.</p>
+<!-- Fuera de la tarjeta: su clic burbujearía hasta el manejador que lo abre. -->
+<input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.ogg,.aac,.m4a,.webm" multiple hidden aria-label="Seleccionar archivos de audio" />
+
+<style>
+  .dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 32px;
+    padding: 64px 24px;
+    border-radius: var(--radius-large);
+    outline: 3px solid transparent;
+    outline-offset: -3px;
+    background: #fff;
+    color: var(--ink);
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.25s var(--ease), outline-color 0.15s, background-color 0.15s;
+  }
+
+  .dropzone:hover {
+    transform: translateY(var(--lift));
+  }
+
+  :global(body.drag-over) .dropzone {
+    outline-color: var(--red);
+    background: #fff5f5;
+    transform: scale(var(--pop));
+  }
+
+  .dropzone-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+
+  .dropzone-btn {
+    min-height: 56px;
+    margin-top: 24px;
+    padding: 0 32px;
+    font-size: 1.0625rem;
+  }
+
+  .dropzone-btn:focus-visible {
+    outline-color: var(--ink);
+  }
+
+  .dropzone-meta {
+    margin-top: 20px;
+    color: var(--ink-muted);
+    font-size: 0.875rem;
+  }
+
+  .trust {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 0.9375rem;
+    text-align: center;
+  }
+
+  @media (max-width: 559px) {
+    .dropzone {
+      margin-top: 24px;
+      padding: 44px 20px;
+    }
+  }
+</style>
