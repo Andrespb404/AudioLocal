@@ -1,11 +1,18 @@
-<section class="dropzone enter enter-1" id="dropzone" aria-label="Agregar archivos">
-  <p class="dropzone-title" id="dropzoneTitle">Arrastra tus archivos aquí</p>
-  <button type="button" class="btn btn-primary dropzone-btn" id="btnBrowse">Elegir archivos</button>
-  <p class="dropzone-meta">MP3, WAV, OGG, AAC o M4A · hasta 150 MB y 20 minutos por archivo</p>
+---
+import { ui } from '../i18n/ui.js';
+
+const { lang = 'es' } = Astro.props;
+const text = ui[lang];
+---
+
+<section class="dropzone enter enter-1" id="dropzone" aria-label={text.dropzone.label}>
+  <p class="dropzone-title" id="dropzoneTitle">{text.dropzone.title}</p>
+  <button type="button" class="btn btn-primary dropzone-btn" id="btnBrowse">{text.dropzone.browse}</button>
+  <p class="dropzone-meta">{text.dropzone.meta}</p>
 </section>
-<p class="trust enter enter-2" id="trustLine">Todo ocurre en tu navegador. Sin registro y gratis.</p>
+<p class="trust enter enter-2" id="trustLine">{text.dropzone.trust}</p>
 <!-- Fuera de la tarjeta: su clic burbujearía hasta el manejador que lo abre. -->
-<input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.ogg,.aac,.m4a,.webm" multiple hidden aria-label="Seleccionar archivos de audio" />
+<input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.ogg,.aac,.m4a,.webm,.flac" multiple hidden aria-label={text.dropzone.input} />
 
 <style>
   .dropzone {

@@ -1,23 +1,22 @@
 ---
+import { ui } from '../i18n/ui.js';
+
 interface Props {
   active: string;
+  lang: 'es' | 'en';
+  alternate: string;
 }
-const { active } = Astro.props;
-
-const links = [
-  { id: 'convert', href: '/', label: 'Convertir' },
-  { id: 'about', href: '/about.html', label: 'Acerca de' },
-  { id: 'privacy', href: '/privacy.html', label: 'Privacidad' },
-  { id: 'terms', href: '/terms.html', label: 'Términos' },
-];
+const { active, lang, alternate } = Astro.props;
+const text = ui[lang];
+const links = text.nav;
 ---
 
 <header class="site-header">
-  <a href="/" class="brand" aria-label="AudioLocal, inicio">
+  <a href={text.home} class="brand" aria-label={text.brandLabel}>
     <svg viewBox="0 0 256 256" aria-hidden="true"><path fill-rule="evenodd" d="M118.10 28.90A14 14 0 0 1 137.90 28.90L223.90 114.90A14 14 0 0 1 228.00 124.80L228.00 211.00A20 20 0 0 1 208.00 231.00L48.00 231.00A20 20 0 0 1 28.00 211.00L28.00 124.80A14 14 0 0 1 32.10 114.90ZM80 135h0a14 14 0 0 1 14 14v20a14 14 0 0 1 -14 14h0a14 14 0 0 1 -14 -14v-20a14 14 0 0 1 14 -14ZM128 107h0a14 14 0 0 1 14 14v76a14 14 0 0 1 -14 14h0a14 14 0 0 1 -14 -14v-76a14 14 0 0 1 14 -14ZM176 135h0a14 14 0 0 1 14 14v20a14 14 0 0 1 -14 14h0a14 14 0 0 1 -14 -14v-20a14 14 0 0 1 14 -14Z"></path></svg>
     AudioLocal
   </a>
-  <nav aria-label="Principal">
+  <nav aria-label={text.navLabel}>
     {
       links.map((link) => (
         <a href={link.href} class:list={{ active: active === link.id }} aria-current={active === link.id ? 'page' : undefined}>
@@ -27,6 +26,7 @@ const links = [
       ))
     }
   </nav>
+  <a class="language" href={alternate} hreflang={text.otherLanguageCode} lang={text.otherLanguageCode} aria-label={text.otherLanguageLabel}>{text.otherLanguage}</a>
 </header>
 
 <style>
@@ -60,6 +60,22 @@ const links = [
   nav {
     display: flex;
     gap: 20px;
+    margin-left: auto;
+  }
+
+  .language {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--muted);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-underline-offset: 3px;
+    transition: color 0.15s;
+  }
+
+  .language:hover {
+    color: var(--text);
   }
 
   nav a {
@@ -116,8 +132,14 @@ const links = [
       padding: 12px 0;
     }
 
+    .language {
+      margin-left: auto;
+    }
+
     nav {
+      order: 1;
       width: 100%;
+      margin-left: 0;
       justify-content: space-between;
       gap: 12px;
     }

@@ -1,11 +1,18 @@
+---
+import { ui } from '../i18n/ui.js';
+
+const { lang = 'es' } = Astro.props;
+const text = ui[lang];
+---
+
 <aside class="coffee card enter enter-3" aria-labelledby="coffeeTitle">
   <div>
-    <h2 class="coffee-title" id="coffeeTitle">¿Te fue útil?</h2>
-    <p class="coffee-text">AudioLocal es gratis, sin anuncios y sin registro.</p>
+    <h2 class="coffee-title" id="coffeeTitle">{text.coffeeTitle}</h2>
+    <p class="coffee-text">{text.coffeeText}</p>
   </div>
   <a class="btn coffee-btn" href="https://ko-fi.com/audiolocal" target="_blank" rel="noopener">
-    Invítame un café
-    <span class="sr-only">(se abre en una pestaña nueva)</span>
+    {text.coffee}
+    <span class="sr-only">{text.newTab}</span>
   </a>
 </aside>
 

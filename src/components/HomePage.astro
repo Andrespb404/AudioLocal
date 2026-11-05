@@ -1,0 +1,88 @@
+---
+import Base from '../layouts/Base.astro';
+import Coffee from './Coffee.astro';
+import ConversionLinks from './ConversionLinks.astro';
+import ConverterTool from './ConverterTool.astro';
+import Faq from './Faq.astro';
+import { appJsonLd, ui } from '../i18n/ui.js';
+
+const { lang } = Astro.props;
+const text = ui[lang];
+const page = text.homePage;
+const path = text.home;
+---
+
+<Base
+  title={page.title}
+  description={page.description}
+  path={path}
+  alternate={ui[text.otherLanguageCode].home}
+  lang={lang}
+  active="convert"
+  ogDescription={page.ogDescription}
+  ogImageAlt={page.ogImageAlt}
+  twitterDescription={page.twitterDescription}
+  jsonLd={[
+    { '@context': 'https://schema.org', '@type': 'WebSite', name: 'AudioLocal', url: new URL(path, Astro.site).href, inLanguage: lang, description: page.appDescription },
+    appJsonLd(lang, new URL(path, Astro.site).href, page.appDescription),
+  ]}
+>
+  <ConverterTool lang={lang} title={page.h1} />
+  <Coffee lang={lang} />
+
+  <section class="features" aria-label={text.featuresLabel}>
+    {
+      page.features.map((feature) => (
+        <div class="card reveal">
+          <h2 class="feature-title">{feature.title}</h2>
+          <p class="feature-text">{feature.text}</p>
+        </div>
+      ))
+    }
+  </section>
+
+  <ConversionLinks lang={lang} />
+
+  <section class="card prose reveal seo">
+    <h2>{page.seoTitle}</h2>
+    <p>{page.seoText}</p>
+    <ul>
+      {page.seoList.map((item) => <li>{item}</li>)}
+    </ul>
+
+    <h3>{page.wavTitle}</h3>
+    <p>{page.wavText}</p>
+  </section>
+
+  <Faq lang={lang} items={page.faq} />
+</Base>
+
+<style>
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .feature-title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+
+  .feature-text {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 0.9375rem;
+  }
+
+  .seo {
+    margin-top: 16px;
+  }
+
+  @media (max-width: 559px) {
+    .features {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

@@ -1,6 +1,13 @@
-<section class="player" id="player" aria-label="Reproductor" hidden>
+---
+import { ui } from '../i18n/ui.js';
+
+const { lang = 'es' } = Astro.props;
+const text = ui[lang];
+---
+
+<section class="player" id="player" aria-label={text.player.label} hidden>
   <div class="player-inner">
-    <button type="button" class="play-btn" id="btnPlay" aria-label="Reproducir">
+    <button type="button" class="play-btn" id="btnPlay" aria-label={text.player.play}>
       <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
       <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg>
     </button>
@@ -12,24 +19,24 @@
       </div>
       <div class="player-seek">
         <span id="playerCurrent">0:00</span>
-        <input type="range" id="playerSeek" min="0" max="0" step="0.1" value="0" aria-label="Posición" />
+        <input type="range" id="playerSeek" min="0" max="0" step="0.1" value="0" aria-label={text.player.position} />
         <span id="playerTotal">0:00</span>
       </div>
     </div>
 
-    <div class="seg player-compare" id="playerCompare" role="radiogroup" aria-label="Versión a escuchar" hidden>
+    <div class="seg player-compare" id="playerCompare" role="radiogroup" aria-label={text.player.compare} hidden>
       <span class="seg-slider" aria-hidden="true"></span>
       <label>
         <input class="sr-only" type="radio" name="playerSource" value="original" checked />
-        <span class="compare-box">Original</span>
+        <span class="compare-box">{text.player.original}</span>
       </label>
       <label>
         <input class="sr-only" type="radio" name="playerSource" value="converted" />
-        <span class="compare-box">Convertido</span>
+        <span class="compare-box">{text.player.converted}</span>
       </label>
     </div>
 
-    <button type="button" class="text-btn player-close" id="btnPlayerClose" aria-label="Cerrar reproductor">Cerrar</button>
+    <button type="button" class="text-btn player-close" id="btnPlayerClose" aria-label={text.player.closeLabel}>{text.player.close}</button>
   </div>
   <audio id="playerAudio" preload="metadata"></audio>
 </section>

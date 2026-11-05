@@ -1,5 +1,6 @@
 // Decodificación, procesamiento y codificación de audio. Nada de esto toca el DOM.
 /* global lamejs */
+import { t } from "./messages.js";
 
 export const MAX_FILE_SIZE = 150 * 1024 * 1024; // 150 MB
 export const MAX_DURATION_SECONDS = 20 * 60;
@@ -18,8 +19,10 @@ const SUPPORTED_AUDIO_TYPES = [
   "audio/x-aac",
   "audio/mp4",
   "audio/x-m4a",
+  "audio/flac",
+  "audio/x-flac",
 ];
-const SUPPORTED_FILE_EXTENSIONS = ["mp3", "wav", "ogg", "aac", "m4a", "webm"];
+const SUPPORTED_FILE_EXTENSIONS = ["mp3", "wav", "ogg", "aac", "m4a", "webm", "flac"];
 
 export const FORMAT_MAP = {
   wav: { ext: "wav", type: "wav", bitrate: null },
@@ -64,8 +67,8 @@ export function isSupportedAudioFile(file) {
 
 /** Motivo de rechazo de un archivo, o null si es válido. */
 export function validateFile(file) {
-  if (!isSupportedAudioFile(file)) return "Formato no válido. Usa MP3, WAV, OGG, AAC o M4A.";
-  if (file.size > MAX_FILE_SIZE) return "Supera el máximo de 150 MB.";
+  if (!isSupportedAudioFile(file)) return t.invalidFormat;
+  if (file.size > MAX_FILE_SIZE) return t.tooLarge;
   return null;
 }
 
@@ -77,7 +80,7 @@ export function getFileFormatLabel(file) {
   if (t.includes("ogg")) return "OGG";
   if (t.includes("aac") || t.includes("mp4") || t.includes("m4a")) return "AAC";
   const ext = getFileExtension(file);
-  return ext ? ext.toUpperCase() : "Desconocido";
+  return ext ? ext.toUpperCase() : t.unknownFormat;
 }
 
 export function formatLabel(formatInfo) {
@@ -97,8 +100,8 @@ export function formatDuration(seconds) {
   return `${Math.floor(total / 60)}:${(total % 60).toString().padStart(2, "0")}`;
 }
 
-export const channelsLabel = (channels) => (channels === 1 ? "Mono" : "Estéreo");
-export const sampleRateLabel = (rate) => `${rate.toLocaleString("es")} Hz`;
+export const channelsLabel = (channels) => (channels === 1 ? t.mono : t.stereo);
+export const sampleRateLabel = (rate) => `${rate.toLocaleString(t.locale)} Hz`;
 
 /** Frecuencia final según los ajustes y lo que admite el formato. */
 export function targetSampleRate(settings, bufferRate, formatInfo) {
@@ -202,7 +205,7 @@ async function encodeMP3(audioBuffer, bitrate, onProgress, signal) {
     if (mp3buf.length > 0) mp3Data.push(new Uint8Array(mp3buf));
 
     if (b % 100 === 0) {
-      onProgress(70 + Math.floor((b / totalBlocks) * 28), "Codificando MP3");
+      onProgress(70 + Math.floor((b / totalBlocks) * 28), t.encoding("MP3"));
       await new Promise((resolve) => setTimeout(resolve, 0));
       signal?.throwIfAborted();
     }
@@ -243,7 +246,7 @@ async function encodeWithMediaRecorder(audioBuffer, mimeType, onProgress, signal
   return new Promise((resolve, reject) => {
     const ticker = setInterval(() => {
       const done = Math.min(1, (ctx.currentTime - startedAt) / audioBuffer.duration);
-      onProgress(70 + Math.floor(done * 28), "Codificando en tiempo real");
+      onProgress(70 + Math.floor(done * 28), t.encodingRealtime);
     }, 500);
 
     const stop = () => {
@@ -352,41 +355,41 @@ async function encode(buffer, formatInfo, onProgress, signal) {
 
 /** Convierte un archivo completo. El audio decodificado se libera al terminar. */
 export async function convertFile(file, settings, { onProgress = () => {}, onWarning = () => {}, signal } = {}) {
-  onProgress(5, "Leyendo archivo");
+  onProgress(5, t.reading);
   let buffer = await decodeFile(file);
   signal?.throwIfAborted();
 
   let formatInfo = FORMAT_MAP[settings.format] ?? FORMAT_MAP.wav;
   if (!isOutputFormatSupported(settings.format)) {
-    onWarning(`${formatLabel(formatInfo)} no está disponible en este navegador. Se usará WAV.`);
+    onWarning(t.formatUnavailable(formatLabel(formatInfo)));
     formatInfo = FORMAT_MAP.wav;
   }
 
   if (settings.normalize) {
-    onProgress(25, "Normalizando volumen");
+    onProgress(25, t.normalizing);
     buffer = normalizeBuffer(buffer);
   }
 
   const rate = targetSampleRate(settings, buffer.sampleRate, formatInfo);
   if (buffer.sampleRate !== rate) {
-    onProgress(45, "Remuestreando");
+    onProgress(45, t.resampling);
     buffer = await resampleAudioBuffer(buffer, rate);
     signal?.throwIfAborted();
   }
 
   if (buffer.numberOfChannels !== settings.channels) {
-    onProgress(60, "Ajustando canales");
+    onProgress(60, t.adjustingChannels);
     buffer = convertChannels(buffer, settings.channels);
   }
 
-  onProgress(70, `Codificando ${formatLabel(formatInfo)}`);
+  onProgress(70, t.encoding(formatLabel(formatInfo)));
   let blob;
   try {
     blob = await encode(buffer, formatInfo, onProgress, signal);
   } catch (err) {
     if (signal?.aborted || formatInfo.type === "wav") throw err;
     console.error(err);
-    onWarning(`No se pudo codificar a ${formatLabel(formatInfo)}. Se generó WAV.`);
+    onWarning(t.encodeFailed(formatLabel(formatInfo)));
     formatInfo = FORMAT_MAP.wav;
     blob = encodeWAV(buffer);
   }

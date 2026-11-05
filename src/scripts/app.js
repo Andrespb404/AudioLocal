@@ -25,6 +25,7 @@ import {
   runQueue,
   uniqueName,
 } from "./queue.js";
+import { t } from "./messages.js";
 
 const $ = (id) => document.getElementById(id);
 const SETTINGS_STORE = "audiolocal-settings";
@@ -162,7 +163,7 @@ function markUnsupportedFormats() {
   for (const radio of typeRadios) {
     radio.disabled = radio.value !== "mp3" && !isOutputFormatSupported(radio.value);
     if (!radio.disabled) continue;
-    radio.closest("label").querySelector("[data-detail]").textContent = "No disponible aquí";
+    radio.closest("label").querySelector("[data-detail]").textContent = t.unavailableHere;
     if (radio.checked) checkRadio(typeRadios, "mp3");
   }
 }
@@ -170,13 +171,13 @@ function markUnsupportedFormats() {
 // ==================== FILAS DE LA COLA ====================
 function rowMeta(item, settings) {
   if (item.status === STATUS.ERROR) return item.error;
-  if (item.status === STATUS.ANALYZING) return "Analizando…";
-  if (item.status === STATUS.CONVERTING) return `${item.stage || "Convirtiendo"}… ${item.progress}%`;
+  if (item.status === STATUS.ANALYZING) return t.analyzing;
+  if (item.status === STATUS.CONVERTING) return `${item.stage || t.converting}… ${item.progress}%`;
 
   const duration = formatDuration(item.meta.duration);
   if (item.status === STATUS.DONE) {
     const { format, blob } = item.result;
-    return `${format} · ${duration} · ${formatBytes(blob.size)} (antes ${formatBytes(item.file.size)})`;
+    return `${format} · ${duration} · ${formatBytes(blob.size)} (${t.before(formatBytes(item.file.size))})`;
   }
   const estimate = formatBytes(estimateOutputBytes(item.meta, settings));
   return `${getFileFormatLabel(item.file)} · ${duration} · ${formatBytes(item.file.size)} → ≈ ${estimate}`;
@@ -196,9 +197,9 @@ function createRow(item, order = 0) {
   const nameField = row.querySelector('[data-field="name"]');
   nameField.textContent = name;
   nameField.title = name;
-  row.querySelector('[data-field="progress"]').setAttribute("aria-label", `Progreso de ${name}`);
-  setRowButton(row.querySelector('[data-action="retry"]'), "Reintentar", name);
-  setRowButton(row.querySelector('[data-action="remove"]'), "Quitar", name);
+  row.querySelector('[data-field="progress"]').setAttribute("aria-label", t.progressOf(name));
+  setRowButton(row.querySelector('[data-action="retry"]'), t.retry, name);
+  setRowButton(row.querySelector('[data-action="remove"]'), t.remove, name);
   rows.set(item.id, row);
   queueList.append(row);
   return row;
@@ -227,10 +228,10 @@ function updateRow(item, settings = getSettings()) {
 
   const action = (actionName) => row.querySelector(`[data-action="${actionName}"]`);
   action("play").hidden = !item.meta;
-  setRowButton(action("play"), playing ? "Pausar" : "Escuchar", name);
+  setRowButton(action("play"), playing ? t.pause : t.listen, name);
   action("download").hidden = !isDone;
   action("download").classList.toggle("is-saved", item.downloaded);
-  setRowButton(action("download"), item.downloaded ? "Descargado" : "Descargar", name);
+  setRowButton(action("download"), item.downloaded ? t.downloaded : t.download, name);
   action("retry").hidden = !(isError && item.retryable);
   action("remove").disabled = busy;
 }
@@ -278,33 +279,33 @@ function updateState() {
 
   btnConvert.hidden = running || state === "done";
   btnConvert.disabled = counts.pending === 0;
-  let convertLabel = "Convertir";
-  if (counts.pending > 1) convertLabel = `Convertir ${counts.pending} archivos`;
-  else if (counts.pending === 1) convertLabel = "Convertir archivo";
-  else if (counts.analyzing > 0) convertLabel = "Analizando…";
+  let convertLabel = t.convert;
+  if (counts.pending > 1) convertLabel = t.convertMany(counts.pending);
+  else if (counts.pending === 1) convertLabel = t.convertOne;
+  else if (counts.analyzing > 0) convertLabel = t.analyzing;
   setText(btnConvert, convertLabel);
 
   btnCancel.hidden = !running;
   btnZip.hidden = counts.done === 0 || running;
   btnZip.classList.toggle("btn-primary", state === "done");
   btnZip.classList.toggle("btn-wide", state === "done");
-  setText($("zipLabel"), zipLabel ?? (counts.done === 1 ? "Descargar" : "Descargar todo"));
+  setText($("zipLabel"), zipLabel ?? (counts.done === 1 ? t.download : t.downloadAll));
   btnAgain.hidden = state !== "done";
   btnClear.hidden = running;
 
-  let title = "Archivos";
-  if (state === "done") title = counts.done === 1 ? "Tu archivo está listo" : `${counts.done} archivos listos`;
+  let title = t.files;
+  if (state === "done") title = counts.done === 1 ? t.oneReady : t.manyReady(counts.done);
   setText($("filesTitle"), title);
 
   const parts = [];
   if (running) {
     parts.push(conversionLabel(counts));
   } else {
-    if (counts.analyzing) parts.push(`${counts.analyzing} analizando`);
-    if (counts.pending) parts.push(`${counts.pending} pendiente${counts.pending > 1 ? "s" : ""}`);
-    if (counts.done && state !== "done") parts.push(`${counts.done} listo${counts.done > 1 ? "s" : ""}`);
+    if (counts.analyzing) parts.push(t.analyzingCount(counts.analyzing));
+    if (counts.pending) parts.push(t.pendingCount(counts.pending));
+    if (counts.done && state !== "done") parts.push(t.readyCount(counts.done));
   }
-  if (counts.error) parts.push(`${counts.error} con error`);
+  if (counts.error) parts.push(t.errorCount(counts.error));
   setText($("queueStatus"), parts.join(" · "));
   $("statusEq").hidden = !(running || counts.analyzing);
 }
@@ -315,7 +316,7 @@ async function analyze(item) {
   try {
     const buffer = await decodeFile(item.file);
     if (buffer.duration > MAX_DURATION_SECONDS) {
-      Object.assign(item, { status: STATUS.ERROR, error: "Supera la duración máxima de 20 minutos." });
+      Object.assign(item, { status: STATUS.ERROR, error: t.tooLong });
     } else {
       Object.assign(item, {
         status: STATUS.PENDING,
@@ -324,7 +325,7 @@ async function analyze(item) {
     }
   } catch (err) {
     console.error(err);
-    Object.assign(item, { status: STATUS.ERROR, error: "No se pudo leer el audio de este archivo." });
+    Object.assign(item, { status: STATUS.ERROR, error: t.unreadable });
   }
   if (!items.includes(item)) return;
   updateRow(item);
@@ -405,11 +406,11 @@ async function startConversion() {
   updateAllRows();
   updateState();
   if (focusLost) (document.body.dataset.state === "done" ? btnZip : btnConvert).focus();
-  if (signal.aborted) showToast("Conversión cancelada");
+  if (signal.aborted) showToast(t.cancelled);
 }
 
 function convertAgain() {
-  if (hasUnsavedResults(items) && !confirm("Hay archivos convertidos sin descargar. ¿Convertirlos de nuevo y reemplazarlos?")) return;
+  if (hasUnsavedResults(items) && !confirm(t.confirmReconvert)) return;
   for (const item of items) {
     if (item.status !== STATUS.DONE) continue;
     URL.revokeObjectURL(item.result.url);
@@ -440,15 +441,15 @@ async function downloadAll() {
   const done = items.filter((item) => item.status === STATUS.DONE);
   if (done.length === 1) {
     downloadItem(done[0]);
-    return setZipLabel("Descargado", ZIP_DONE_MS);
+    return setZipLabel(t.downloaded, ZIP_DONE_MS);
   }
 
   const total = done.reduce((sum, item) => sum + item.result.blob.size, 0);
-  if (total >= ZIP_MAX_BYTES) return showToast("El lote supera 4 GB. Descarga los archivos por separado.", "error");
+  if (total >= ZIP_MAX_BYTES) return showToast(t.zipTooLarge, "error");
 
   btnZip.disabled = true;
   $("zipEq").hidden = false;
-  setZipLabel("Preparando ZIP…");
+  setZipLabel(t.zipPreparing);
   try {
     const parts = [];
     const zip = new Zip((err, chunk) => {
@@ -465,11 +466,11 @@ async function downloadAll() {
     saveFile(new Blob(parts, { type: "application/zip" }), "AudioLocal.zip");
     done.forEach((item) => (item.downloaded = true));
     updateAllRows();
-    setZipLabel("Descargado", ZIP_DONE_MS);
+    setZipLabel(t.downloaded, ZIP_DONE_MS);
   } catch (err) {
     console.error(err);
     setZipLabel(null);
-    showToast("No se pudo crear el ZIP. Descarga los archivos por separado.", "error");
+    showToast(t.zipFailed, "error");
   } finally {
     btnZip.disabled = false;
     $("zipEq").hidden = true;
@@ -543,7 +544,7 @@ function togglePlay() {
   if (audio.paused) {
     audio.play().catch((err) => {
       console.error(err);
-      showToast("No se pudo reproducir este audio", "error");
+      showToast(t.cannotPlay, "error");
     });
   } else {
     audio.pause();
@@ -554,7 +555,7 @@ function syncPlayState() {
   const paused = audio.paused;
   $("iconPlay").toggleAttribute("hidden", !paused);
   $("iconPause").toggleAttribute("hidden", paused);
-  $("btnPlay").setAttribute("aria-label", paused ? "Reproducir" : "Pausar");
+  $("btnPlay").setAttribute("aria-label", paused ? t.play : t.pause);
   if (selected) updateRow(selected);
 }
 
@@ -572,7 +573,7 @@ const DROPZONE_TEXT = dropzoneTitle.textContent;
 
 function setDragging(dragging) {
   document.body.classList.toggle("drag-over", dragging);
-  setText(dropzoneTitle, dragging ? "Suéltalos aquí" : DROPZONE_TEXT);
+  setText(dropzoneTitle, dragging ? t.dropHere : DROPZONE_TEXT);
 }
 
 // La página entera recibe archivos: soltarlos fuera de la tarjeta no debe hacer que el navegador navegue a ellos.
@@ -631,7 +632,7 @@ btnCancel.addEventListener("click", () => converting?.abort());
 btnZip.addEventListener("click", downloadAll);
 btnAgain.addEventListener("click", convertAgain);
 btnClear.addEventListener("click", () => {
-  if (hasUnsavedResults(items) && !confirm("Hay archivos convertidos sin descargar. ¿Empezar de nuevo?")) return;
+  if (hasUnsavedResults(items) && !confirm(t.confirmRestart)) return;
   [...items].forEach(removeItem);
   setZipLabel(null);
   $("btnBrowse").focus();
@@ -673,7 +674,7 @@ audio.addEventListener("timeupdate", () => {
 });
 ["play", "pause", "ended"].forEach((name) => audio.addEventListener(name, syncPlayState));
 audio.addEventListener("error", () => {
-  if (audio.getAttribute("src")) showToast("Este navegador no puede reproducir este audio", "warning");
+  if (audio.getAttribute("src")) showToast(t.browserCannotPlay, "warning");
 });
 
 addEventListener("beforeunload", (event) => {
@@ -682,6 +683,8 @@ addEventListener("beforeunload", (event) => {
 
 // ==================== INICIO ====================
 loadSettings();
+// Las páginas por conversión fijan el destino sin tocar las preferencias guardadas.
+checkRadio(typeRadios, document.querySelector("[data-preset]")?.dataset.preset);
 markUnsupportedFormats();
 syncSettingsControls();
 updateState();

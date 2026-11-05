@@ -1,0 +1,8 @@
+---
+import ConversionPage from '../../components/ConversionPage.astro';
+import { conversionPaths } from '../../data/conversions.js';
+
+export const getStaticPaths = () => conversionPaths('en');
+---
+
+<ConversionPage {...Astro.props} />

@@ -1,5 +1,17 @@
 {
   "framework": "astro",
+  "redirects": [
+    {
+      "source": "/en",
+      "destination": "/en.html",
+      "permanent": true
+    },
+    {
+      "source": "/en/",
+      "destination": "/en.html",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/sitemap.xml",

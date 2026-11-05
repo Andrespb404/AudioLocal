@@ -1,23 +1,27 @@
 ---
-const formats = [
-  { value: 'wav', name: 'WAV', detail: 'Sin pérdida' },
-  { value: 'mp3', name: 'MP3', detail: 'El más compatible', checked: true },
-  { value: 'ogg', name: 'OGG', detail: 'Liviano' },
-  { value: 'aac', name: 'AAC', detail: 'Para Apple' },
-];
+import { ui } from '../i18n/ui.js';
+
+const { lang = 'es', preset } = Astro.props;
+const text = ui[lang].options;
+const initialFormat = preset ?? 'mp3';
+const formats = ['wav', 'mp3', 'ogg', 'aac'].map((value) => ({
+  value,
+  name: value.toUpperCase(),
+  detail: text.formats[value],
+}));
 const qualities = [128, 256, 320];
 const rates = [8000, 11025, 16000, 22050, 44100, 48000, 96000];
 ---
 
 <section class="options card enter enter-1" id="optionsSection" aria-labelledby="formatTitle" hidden>
-  <h2 class="section-title" id="formatTitle" tabindex="-1">Convertir a</h2>
+  <h2 class="section-title" id="formatTitle" tabindex="-1">{text.convertTo}</h2>
 
-  <div class="seg formats" role="radiogroup" aria-labelledby="formatTitle">
+  <div class="seg formats" role="radiogroup" aria-labelledby="formatTitle" data-preset={preset}>
     <span class="seg-slider" aria-hidden="true"></span>
     {
       formats.map((format) => (
         <label>
-          <input class="sr-only" type="radio" name="format" value={format.value} checked={format.checked} />
+          <input class="sr-only" type="radio" name="format" value={format.value} checked={format.value === initialFormat} />
           <span class="choice-box">
             <span class="choice-name">{format.name}</span>
             <span class="choice-detail" data-detail>{format.detail}</span>
@@ -28,7 +32,7 @@ const rates = [8000, 11025, 16000, 22050, 44100, 48000, 96000];
   </div>
 
   <div class="quality" id="qualityField">
-    <span class="field-label" id="qualityLabel">Calidad</span>
+    <span class="field-label" id="qualityLabel">{text.quality}</span>
     <div class="seg seg-quiet quality-options" role="radiogroup" aria-labelledby="qualityLabel">
       <span class="seg-slider" aria-hidden="true"></span>
       {
@@ -42,48 +46,48 @@ const rates = [8000, 11025, 16000, 22050, 44100, 48000, 96000];
     </div>
   </div>
 
-  <p class="note" id="formatNote" hidden>Este formato se codifica en tiempo real: un audio de 3 minutos tarda 3 minutos. Usa la frecuencia de muestreo del navegador.</p>
+  <p class="note" id="formatNote" hidden>{text.note}</p>
 
   <details class="more">
-    <summary>Más opciones</summary>
+    <summary>{text.more}</summary>
     <div class="more-grid">
       <div class="field">
-        <label class="field-label" for="channels">Canales</label>
+        <label class="field-label" for="channels">{text.channels}</label>
         <select id="channels">
-          <option value="1">Mono</option>
-          <option value="2" selected>Estéreo</option>
+          <option value="1">{text.mono}</option>
+          <option value="2" selected>{text.stereo}</option>
         </select>
       </div>
       <div class="field">
-        <label class="field-label" for="normalize">Normalizar volumen</label>
+        <label class="field-label" for="normalize">{text.normalize}</label>
         <select id="normalize">
-          <option value="0" selected>No</option>
-          <option value="1">Sí</option>
+          <option value="0" selected>{text.no}</option>
+          <option value="1">{text.yes}</option>
         </select>
       </div>
       <div class="field">
-        <label class="field-label" for="sampleRate">Frecuencia de muestreo</label>
+        <label class="field-label" for="sampleRate">{text.sampleRate}</label>
         <select id="sampleRate">
-          {rates.map((rate) => <option value={rate} selected={rate === 48000}>{rate.toLocaleString('es')} Hz</option>)}
+          {rates.map((rate) => <option value={rate} selected={rate === 48000}>{rate.toLocaleString(lang)} Hz</option>)}
         </select>
       </div>
       <label class="check">
         <input type="checkbox" id="keepSampleRate" checked />
-        Mantener la frecuencia actual
+        {text.keepRate}
       </label>
     </div>
   </details>
 </section>
 
 <div class="actions enter enter-2" id="actions" hidden>
-  <button type="button" class="btn btn-primary btn-wide" id="btnConvert" disabled>Convertir</button>
-  <button type="button" class="btn btn-wide" id="btnCancel" hidden>Cancelar</button>
+  <button type="button" class="btn btn-primary btn-wide" id="btnConvert" disabled>{text.convert}</button>
+  <button type="button" class="btn btn-wide" id="btnCancel" hidden>{text.cancel}</button>
   <button type="button" class="btn" id="btnZip" hidden>
     <span class="eq" id="zipEq" aria-hidden="true" hidden><i></i><i></i><i></i></span>
-    <span id="zipLabel">Descargar todo</span>
+    <span id="zipLabel">{text.downloadAll}</span>
   </button>
-  <button type="button" class="btn" id="btnAgain" hidden>Convertir a otro formato</button>
-  <button type="button" class="btn" id="btnClear">Empezar de nuevo</button>
+  <button type="button" class="btn" id="btnAgain" hidden>{text.again}</button>
+  <button type="button" class="btn" id="btnClear">{text.restart}</button>
 </div>
 
 <style>
