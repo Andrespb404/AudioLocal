@@ -1,0 +1,55 @@
+---
+import Base from '../layouts/Base.astro';
+
+const sections = [
+  { title: '1. Aceptación de los Términos', text: 'Al acceder y utilizar AudioLocal aceptas estos Términos y Condiciones. Si no estás de acuerdo, por favor no uses el servicio.' },
+  { title: '2. Descripción del Servicio', text: 'AudioLocal es una herramienta web que permite convertir archivos de audio directamente en el navegador del usuario. Todo el procesamiento se realiza de forma local.' },
+  {
+    title: '3. Uso del Servicio',
+    items: [
+      'Está prohibido usar el servicio para fines ilegales o que infrinjan derechos de terceros.',
+      'El usuario es el único responsable del contenido de los archivos que procesa.',
+      'No está permitido intentar extraer, modificar o revertir el código fuente del convertidor.',
+    ],
+  },
+  { title: '4. Propiedad Intelectual', text: 'Todo el contenido, diseño y código de AudioLocal pertenece a sus desarrolladores. Se concede un permiso limitado, revocable y no exclusivo para uso personal.' },
+  {
+    title: '5. Limitación de Responsabilidad',
+    text: 'El servicio se ofrece "tal cual" sin garantías de ningún tipo. No nos hacemos responsables por:',
+    items: ['Pérdida o corrupción de archivos', 'Daños derivados del uso del servicio', 'Problemas de compatibilidad con dispositivos o software'],
+  },
+  { title: '6. Donaciones', text: 'El sitio acepta donaciones voluntarias a través de Ko-fi. Las donaciones son opcionales y no afectan el acceso al servicio.' },
+  { title: '7. Modificaciones', text: 'Nos reservamos el derecho de modificar estos términos en cualquier momento. El uso continuado del sitio después de los cambios implica aceptación de los nuevos términos.' },
+  { title: '8. Ley Aplicable', text: 'Estos términos se rigen por las leyes de la República de Colombia (o el país de residencia del operador).' },
+];
+---
+
+<Base
+  title="AudioLocal | Términos y Condiciones"
+  description="Términos y Condiciones de uso de AudioLocal, el convertidor de audio local que opera en tu navegador."
+  path="/terms.html"
+  active="terms"
+  ogDescription="Términos de uso del convertidor de audio local"
+  ogImageAlt="Términos de AudioLocal, servicio de conversión de audio local"
+  twitterDescription="Consulta los términos de uso del convertidor de audio local y privado AudioLocal."
+>
+  <article class="doc prose">
+    <h1 class="title">Términos y Condiciones</h1>
+    <p class="lead">Última actualización: 20 de mayo de 2026</p>
+
+    {
+      sections.map((section) => (
+        <section class="doc-section">
+          <h2>{section.title}</h2>
+          {section.text && <p>{section.text}</p>}
+          {section.items && <ul>{section.items.map((item) => <li>{item}</li>)}</ul>}
+        </section>
+      ))
+    }
+
+    <section class="doc-section">
+      <h2>Contacto</h2>
+      <p>Cualquier consulta sobre estos términos puede enviarse a: <a href="mailto:audiolocal.app@gmail.com">audiolocal.app@gmail.com</a></p>
+    </section>
+  </article>
+</Base>

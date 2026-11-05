@@ -1,0 +1,195 @@
+<section class="queue card enter" id="filesSection" aria-labelledby="filesTitle" hidden>
+  <div class="queue-head">
+    <div class="queue-heading">
+      <h2 class="section-title" tabindex="-1" id="filesTitle">Archivos</h2>
+      <p class="queue-status">
+        <span class="eq" id="statusEq" aria-hidden="true" hidden><i></i><i></i><i></i></span>
+        <span id="queueStatus" role="status"></span>
+      </p>
+    </div>
+    <button type="button" class="btn" id="btnAddMore">Agregar más</button>
+  </div>
+
+  <ul class="queue-list" id="queueList"></ul>
+
+  <template id="queueRowTemplate">
+    <li class="queue-row">
+      <span class="queue-fill" aria-hidden="true"></span>
+      <div class="queue-info">
+        <p class="queue-name" data-field="name"></p>
+        <p class="queue-meta">
+          <span class="eq" data-field="eq" aria-hidden="true" hidden><i></i><i></i><i></i></span>
+          <span data-field="meta"></span>
+        </p>
+        <progress class="sr-only" max="100" value="0" data-field="progress" hidden></progress>
+      </div>
+      <div class="queue-row-actions">
+        <button type="button" class="text-btn" data-action="retry" hidden>Reintentar</button>
+        <button type="button" class="text-btn" data-action="play">Escuchar</button>
+        <button type="button" class="text-btn" data-action="download" hidden>Descargar</button>
+        <button type="button" class="text-btn" data-action="remove">Quitar</button>
+      </div>
+    </li>
+  </template>
+</section>
+
+<!-- Global: las filas se crean en el navegador a partir del template. -->
+<style is:global>
+  .queue {
+    margin-top: 24px;
+  }
+
+  .queue-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .queue-heading {
+    min-width: 0;
+  }
+
+  .queue-head .btn {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .queue-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 1.4em;
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+
+  .queue-status .eq {
+    color: var(--red-text);
+  }
+
+  .queue-list {
+    margin-top: 14px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .queue-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 64px;
+    margin-bottom: 8px;
+    padding: 10px 8px 10px 14px;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--surface-raised);
+    animation: rise 0.35s var(--ease) backwards;
+    animation-delay: calc(var(--i, 0) * 50ms);
+  }
+
+  .queue-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .queue-row.is-done {
+    animation: done-pop 0.45s var(--ease);
+  }
+
+  /* Progreso en toda la fila: transform no recalcula el layout en cada avance. */
+  .queue-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--red-tint);
+    opacity: 0;
+    transform: scaleX(var(--p, 0));
+    transform-origin: left;
+    transition: transform 0.35s var(--ease), opacity 0.4s;
+    pointer-events: none;
+  }
+
+  .queue-row.is-busy .queue-fill {
+    opacity: 1;
+  }
+
+  .queue-info,
+  .queue-row-actions {
+    position: relative;
+  }
+
+  .queue-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .queue-name {
+    overflow: hidden;
+    font-weight: 600;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+
+  .queue-row.is-selected .queue-name {
+    color: var(--red-text);
+  }
+
+  .queue-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 1px;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.35;
+  }
+
+  .queue-row.is-error .queue-meta {
+    color: var(--warning);
+  }
+
+  .queue-row.is-busy .queue-meta,
+  .queue-row.is-playing .queue-meta .eq {
+    color: var(--red-text);
+  }
+
+  .queue-row-actions {
+    display: flex;
+    flex: none;
+  }
+
+  .queue-row [data-action='download'] {
+    color: var(--text);
+  }
+
+  .queue-row [data-action='download'].is-saved {
+    color: var(--muted);
+  }
+
+  .queue-row.is-playing [data-action='play'] {
+    color: var(--red-text);
+  }
+
+  @media (max-width: 559px) {
+    .queue-head {
+      align-items: center;
+    }
+
+    .queue-row {
+      flex-wrap: wrap;
+      gap: 2px 12px;
+    }
+
+    .queue-info {
+      flex-basis: 100%;
+    }
+
+    .queue-row-actions {
+      margin-left: -10px;
+    }
+  }
+</style>

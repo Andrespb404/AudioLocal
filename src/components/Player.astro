@@ -1,0 +1,228 @@
+<section class="player" id="player" aria-label="Reproductor" hidden>
+  <div class="player-inner">
+    <button type="button" class="play-btn" id="btnPlay" aria-label="Reproducir">
+      <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
+      <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg>
+    </button>
+
+    <div class="player-main">
+      <div class="player-info">
+        <p class="player-name" id="playerName"></p>
+        <p class="player-meta" id="playerMeta"></p>
+      </div>
+      <div class="player-seek">
+        <span id="playerCurrent">0:00</span>
+        <input type="range" id="playerSeek" min="0" max="0" step="0.1" value="0" aria-label="Posición" />
+        <span id="playerTotal">0:00</span>
+      </div>
+    </div>
+
+    <div class="seg player-compare" id="playerCompare" role="radiogroup" aria-label="Versión a escuchar" hidden>
+      <span class="seg-slider" aria-hidden="true"></span>
+      <label>
+        <input class="sr-only" type="radio" name="playerSource" value="original" checked />
+        <span class="compare-box">Original</span>
+      </label>
+      <label>
+        <input class="sr-only" type="radio" name="playerSource" value="converted" />
+        <span class="compare-box">Convertido</span>
+      </label>
+    </div>
+
+    <button type="button" class="text-btn player-close" id="btnPlayerClose" aria-label="Cerrar reproductor">Cerrar</button>
+  </div>
+  <audio id="playerAudio" preload="metadata"></audio>
+</section>
+
+<style>
+  .player {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    animation: slide-up 0.35s var(--ease) backwards;
+  }
+
+  .player-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: min(100% - 40px, 720px);
+    margin-inline: auto;
+    padding: 12px 0;
+  }
+
+  .play-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--ink);
+    transition: transform 0.15s var(--ease);
+  }
+
+  .play-btn:hover {
+    transform: scale(1.05);
+  }
+
+  .play-btn:active {
+    transform: scale(var(--press));
+  }
+
+  .play-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .player-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .player-info {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .player-name {
+    overflow: hidden;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .player-meta {
+    flex: none;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+
+  .player-seek {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  input[type='range'] {
+    flex: 1;
+    min-width: 0;
+    height: 28px;
+    background: transparent;
+    appearance: none;
+  }
+
+  input[type='range']::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(to right, var(--red) var(--pos, 0%), var(--line-strong) var(--pos, 0%));
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    margin-top: -5px;
+    border-radius: 50%;
+    background: #fff;
+    appearance: none;
+    transition: transform 0.15s var(--ease);
+  }
+
+  input[type='range']:hover::-webkit-slider-thumb {
+    transform: scale(1.25);
+  }
+
+  input[type='range']::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line-strong);
+  }
+
+  input[type='range']::-moz-range-progress {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--red);
+  }
+
+  input[type='range']::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.15s var(--ease);
+  }
+
+  input[type='range']:hover::-moz-range-thumb {
+    transform: scale(1.25);
+  }
+
+  .player-compare {
+    flex: none;
+  }
+
+  .compare-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  @media (pointer: coarse) {
+    .compare-box {
+      min-height: 44px;
+    }
+
+    input[type='range'] {
+      height: 44px;
+    }
+
+    input[type='range']::-webkit-slider-thumb {
+      width: 20px;
+      height: 20px;
+      margin-top: -8px;
+    }
+
+    input[type='range']::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  @media (max-width: 559px) {
+    .player-inner {
+      flex-wrap: wrap;
+      gap: 8px 12px;
+    }
+
+    .player-meta {
+      display: none;
+    }
+
+    /* Línea propia solo cuando existe: sin resultado, el reproductor ocupa una sola fila. */
+    .player-compare {
+      flex: 1 0 100%;
+      order: 1;
+    }
+
+    .player-close {
+      margin-left: -4px;
+    }
+  }
+</style>

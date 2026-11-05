@@ -1,0 +1,595 @@
+:root {
+  color-scheme: dark;
+
+  --bg: #0c0c0d;
+  --surface: #18181a;
+  --surface-raised: #232326;
+  --line: #2b2b2e;
+  --line-strong: #56565b;
+  --text: #f5f5f4;
+  --muted: #a1a1a1;
+  --ink: #111112;
+  --ink-muted: #5c5c60;
+
+  /* Rojo = activo o acción principal. No usar para nada más: los errores van en ámbar. */
+  --red: #e02b3a;
+  --red-hover: #c9202e;
+  --red-text: #ff7078;
+  --red-tint: rgb(224 43 58 / 0.2);
+  --warning: #f2b84b;
+
+  /* Crema: solo para el botón del café. */
+  --coffee: #f8e0cf;
+  --coffee-hover: #f3cfb6;
+  --coffee-ink: #3a2314;
+
+  --radius: 10px;
+  --radius-large: 16px;
+  --font: "Instrument Sans Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Todo desplazamiento sale de aquí; reducir movimiento los apaga en un solo lugar. */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --rise: 12px;
+  --lift: -2px;
+  --press: 0.98;
+  --pop: 1.012;
+  --slide: 100%;
+  --seg-speed: 0.3s;
+  --eq-animation: eq;
+}
+
+/* Reducir movimiento no es apagar todo: se conservan fundidos, colores y loaders. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --rise: 0px;
+    --lift: 0px;
+    --press: 1;
+    --pop: 1;
+    --slide: 0%;
+    --seg-speed: 0s;
+    --eq-animation: eq-soft;
+  }
+
+  ::view-transition-group(nav-line) {
+    animation: none;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mantiene el contenido visible por encima del reproductor fijo. */
+body:has(.player:not([hidden])) {
+  padding-bottom: 140px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+a {
+  color: var(--text);
+  text-underline-offset: 3px;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button,
+select,
+summary,
+label:has(input) {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Animaciones ---------- */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.2s;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise));
+  }
+}
+
+/* Mismo movimiento con otro nombre: cambiar de nombre es lo que reinicia una animación. */
+@keyframes rise-again {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise));
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(var(--slide));
+  }
+}
+
+@keyframes done-pop {
+  40% {
+    transform: scale(var(--pop));
+  }
+}
+
+@keyframes eq {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes eq-soft {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Solo fill "backwards": un fill final bloquearía el transform de los estados hover. */
+.enter {
+  animation: rise 0.5s var(--ease) backwards;
+}
+
+.enter-1 {
+  animation-delay: 70ms;
+}
+
+.enter-2 {
+  animation-delay: 140ms;
+}
+
+.enter-3 {
+  animation-delay: 210ms;
+}
+
+@supports (animation-timeline: view()) {
+  /* Propiedades sueltas: fundidas en un solo "animation" con view(), Chrome rechaza la regla. */
+  .reveal,
+  .doc-section {
+    animation-name: rise;
+    animation-timing-function: linear;
+    animation-fill-mode: backwards;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}
+
+/* ---------- Loader: las tres barras del logo ---------- */
+.eq {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 13px;
+  flex: none;
+}
+
+.eq i {
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  animation: var(--eq-animation) 0.9s ease-in-out infinite;
+}
+
+.eq i:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.eq i:nth-child(3) {
+  animation-delay: -0.6s;
+}
+
+/* ---------- Estructura ---------- */
+.page {
+  display: flex;
+  flex-direction: column;
+  width: min(100% - 40px, 720px);
+  min-height: 100dvh;
+  margin-inline: auto;
+}
+
+main {
+  flex: 1;
+}
+
+.card {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-large);
+  background: var(--surface);
+}
+
+/* ---------- Títulos ---------- */
+.title {
+  font-size: clamp(2.25rem, 5.2vw, 3.625rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+/* ---------- Botones ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.15s, border-color 0.15s, transform 0.15s var(--ease);
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  background: var(--surface-raised);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(var(--press));
+}
+
+.btn:disabled {
+  opacity: 0.5;
+}
+
+.btn-primary {
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-primary:hover:not(:disabled) {
+  border-color: var(--red-hover);
+  background: var(--red-hover);
+}
+
+.btn-wide {
+  flex: 1 0 100%;
+  min-height: 56px;
+  font-size: 1.0625rem;
+}
+
+/* Botón de texto discreto para acciones secundarias, en lugar de íconos. */
+.text-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s, transform 0.15s var(--ease);
+}
+
+.text-btn:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.07);
+  color: var(--text);
+}
+
+.text-btn:active:not(:disabled) {
+  transform: scale(var(--press));
+}
+
+.text-btn:disabled {
+  opacity: 0.4;
+}
+
+@media (pointer: coarse) {
+  .text-btn {
+    min-height: 44px;
+  }
+}
+
+/* ---------- Selector con fondo deslizante ---------- */
+.seg {
+  --cols: 2;
+  --rows: 1;
+  --col: 0;
+  --row: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--surface-raised);
+}
+
+.seg:has(label:nth-of-type(2) input:checked) {
+  --col: 1;
+}
+
+.seg:has(label:nth-of-type(3) input:checked) {
+  --col: 2;
+}
+
+.seg:has(label:nth-of-type(4) input:checked) {
+  --col: 3;
+}
+
+.seg-slider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  display: none;
+  width: calc((100% - 8px) / var(--cols));
+  height: calc((100% - 8px) / var(--rows));
+  border-radius: 9px;
+  background: var(--red);
+  transform: translate(calc(var(--col) * 100%), calc(var(--row) * 100%));
+  transition: transform var(--seg-speed) var(--ease);
+}
+
+.seg label {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+
+.seg label > span {
+  display: block;
+  border-radius: 9px;
+  color: var(--muted);
+  transition: color 0.2s, background-color 0.15s;
+}
+
+.seg label:hover input:not(:checked, :disabled) + span {
+  background: rgb(255 255 255 / 0.05);
+  color: var(--text);
+}
+
+.seg input:checked + span {
+  background: var(--red);
+  color: #fff;
+}
+
+.seg input:focus-visible + span {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.seg input:disabled + span {
+  opacity: 0.45;
+}
+
+.seg label:has(input:disabled) {
+  cursor: not-allowed;
+}
+
+/* Sin :has no se puede ubicar el fondo: el elegido se pinta directamente. */
+@supports selector(:has(*)) {
+  .seg-slider {
+    display: block;
+  }
+
+  .seg input:checked + span {
+    background: transparent;
+  }
+}
+
+.seg-quiet .seg-slider {
+  border: 1px solid var(--red-text);
+  background: transparent;
+}
+
+.seg-quiet input:checked + span {
+  background: transparent;
+  color: var(--red-text);
+  font-weight: 600;
+}
+
+/* ---------- Secciones desplegables ---------- */
+details {
+  interpolate-size: allow-keywords;
+}
+
+details::details-content {
+  height: 0;
+  overflow: clip;
+  transition: height 0.28s var(--ease), content-visibility 0.28s allow-discrete;
+}
+
+details[open]::details-content {
+  height: auto;
+}
+
+summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: none;
+  margin-right: 4px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 0.25s var(--ease);
+}
+
+details[open] > summary::after {
+  transform: rotate(-135deg);
+}
+
+/* ---------- Páginas de texto ---------- */
+.doc {
+  padding: 32px 0 8px;
+}
+
+.doc .lead {
+  max-width: 60ch;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 1.125rem;
+}
+
+.doc-section {
+  margin-top: 16px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-large);
+  background: var(--surface);
+}
+
+.doc-section:first-of-type {
+  margin-top: 32px;
+}
+
+.prose h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.prose h3 {
+  margin-top: 20px;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.prose p,
+.prose ul {
+  max-width: 65ch;
+  margin-top: 10px;
+  color: #cfcfce;
+}
+
+.prose strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.prose ul {
+  padding-left: 20px;
+}
+
+.prose li + li {
+  margin-top: 6px;
+}
+
+.updated-note {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* ---------- Soltar archivos cuando ya no está la tarjeta blanca ---------- */
+body.drag-over:not([data-state="empty"])::after {
+  content: "Suelta los archivos para agregarlos";
+  position: fixed;
+  inset: 12px;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  border: 2px dashed var(--red);
+  border-radius: var(--radius-large);
+  background: rgb(12 12 13 / 0.9);
+  font-size: 1.5rem;
+  font-weight: 600;
+  pointer-events: none;
+  animation: fade-in 0.15s ease-out;
+}
+
+@media (max-width: 559px) {
+  .card,
+  .doc-section {
+    padding: 20px;
+  }
+}
