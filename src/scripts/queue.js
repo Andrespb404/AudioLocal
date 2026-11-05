@@ -1,4 +1,5 @@
 // Estado de la cola por lotes. Sin DOM ni audio, para poder probarlo con node --test.
+import { t } from "./messages.js";
 
 export const STATUS = {
   ANALYZING: "analyzing",
@@ -48,7 +49,7 @@ export async function runQueue(items, convert, { signal, onChange = () => {} } =
         status: STATUS.ERROR,
         progress: 0,
         retryable: true,
-        error: err?.message || "No se pudo convertir",
+        error: err?.message || t.conversionFailed,
       });
     }
     onChange(item);
@@ -69,8 +70,8 @@ export function countByStatus(items) {
 /** Texto del avance del lote, a partir de countByStatus. */
 export function conversionLabel(counts) {
   const total = counts[STATUS.DONE] + counts[STATUS.CONVERTING] + counts[STATUS.PENDING];
-  if (total <= 1) return "Convirtiendo";
-  return `Convirtiendo ${Math.min(total, counts[STATUS.DONE] + 1)} de ${total}`;
+  if (total <= 1) return t.converting;
+  return t.convertingOf(Math.min(total, counts[STATUS.DONE] + 1), total);
 }
 
 export const hasUnsavedResults = (items) =>

@@ -52,6 +52,8 @@ test("estimateOutputBytes calcula por bitrate o por PCM", () => {
 
 test("validateFile rechaza formato y tamaño, sin exigir tipo MIME", () => {
   assert.equal(validateFile({ name: "a.mp3", type: "", size: 10 }), null);
+  assert.equal(validateFile({ name: "a.flac", type: "", size: 10 }), null);
+  assert.equal(validateFile({ name: "a.bin", type: "audio/flac", size: 10 }), null);
   assert.match(validateFile({ name: "a.txt", type: "text/plain", size: 10 }), /Formato/);
   assert.match(validateFile({ name: "a.wav", type: "audio/wav", size: 151 * 1024 * 1024 }), /150 MB/);
 });

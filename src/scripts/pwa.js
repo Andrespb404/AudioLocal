@@ -1,5 +1,7 @@
+import { t } from "./messages.js";
+
 const CACHE_NAME = "audiolocal-v1";
-const PAGES = ["/", "/about.html", "/privacy.html", "/terms.html"];
+const PAGES = ["/", "/about.html", "/privacy.html", "/terms.html", "/en.html", "/en/about.html", "/en/privacy.html", "/en/terms.html"];
 
 // Los recursos de esta primera carga se pidieron antes de que existiera el service worker, y se
 // puede entrar por cualquier página: se guardan todas con sus assets para funcionar sin conexión.
@@ -32,7 +34,7 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
     try {
       await navigator.serviceWorker.register("/sw.js");
       await navigator.serviceWorker.ready;
-      if (await cacheSite()) status.textContent = "Listo sin conexión";
+      if (await cacheSite()) status.textContent = t.offlineReady;
     } catch (err) {
       console.warn("Modo sin conexión no disponible:", err);
     }

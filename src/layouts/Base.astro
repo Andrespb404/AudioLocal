@@ -2,27 +2,30 @@
 import '@fontsource-variable/instrument-sans';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
+import { ui } from '../i18n/ui.js';
 
 interface Props {
   title: string;
   description: string;
   path: string;
+  alternate: string;
+  lang?: 'es' | 'en';
   active: 'convert' | 'about' | 'privacy' | 'terms';
-  keywords?: string;
   ogTitle?: string;
   ogDescription?: string;
   ogImageAlt: string;
   twitterTitle?: string;
   twitterDescription?: string;
-  jsonLd?: object;
+  jsonLd?: object | object[];
 }
 
 const {
   title,
   description,
   path,
+  alternate,
+  lang = 'es',
   active,
-  keywords,
   ogTitle = title,
   ogDescription = description,
   ogImageAlt,
@@ -31,23 +34,27 @@ const {
   jsonLd,
 } = Astro.props;
 
+const text = ui[lang];
 const canonical = new URL(path, Astro.site).href;
+const alternateUrl = new URL(alternate, Astro.site).href;
+const esUrl = lang === 'es' ? canonical : alternateUrl;
+const enUrl = lang === 'en' ? canonical : alternateUrl;
 const ogImage = new URL('/assets/audiolocal_og.png', Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="robots" content="index,follow" />
     <meta name="description" content={description} />
-    {keywords && <meta name="keywords" content={keywords} />}
     <meta name="author" content="AudioLocal" />
     <meta name="theme-color" content="#0c0c0d" />
 
-    <meta property="og:locale" content="es_ES" />
+    <meta property="og:locale" content={text.ogLocale} />
+    <meta property="og:locale:alternate" content={ui[text.otherLanguageCode].ogLocale} />
     <meta property="og:title" content={ogTitle} />
     <meta property="og:description" content={ogDescription} />
     <meta property="og:url" content={canonical} />
@@ -60,7 +67,9 @@ const ogImage = new URL('/assets/audiolocal_og.png', Astro.site).href;
     <meta name="twitter:image" content={ogImage} />
 
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" href={canonical} hreflang="es" />
+    <link rel="alternate" href={esUrl} hreflang="es" />
+    <link rel="alternate" href={enUrl} hreflang="en" />
+    <link rel="alternate" href={enUrl} hreflang="x-default" />
     <link rel="icon" href="/assets/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
@@ -70,18 +79,16 @@ const ogImage = new URL('/assets/audiolocal_og.png', Astro.site).href;
 
   <body>
     <div class="page">
-      <Header active={active} />
+      <Header active={active} lang={lang} alternate={alternate} />
       <main>
         <slot />
       </main>
       <footer class="site-footer">
         <div class="footer-links">
-          <a href="/about.html">Acerca de</a>
-          <a href="/privacy.html">Privacidad</a>
-          <a href="/terms.html">Términos</a>
-          <a href="https://ko-fi.com/audiolocal" target="_blank" rel="noopener">Invítame un café</a>
+          {text.nav.slice(1).map((link) => <a href={link.href}>{link.label}</a>)}
+          <a href="https://ko-fi.com/audiolocal" target="_blank" rel="noopener">{text.coffee}</a>
         </div>
-        <p>© 2026 AudioLocal · <span id="offlineStatus" role="status">Procesado en tu dispositivo</span></p>
+        <p>© 2026 AudioLocal · <span id="offlineStatus" role="status">{text.processedHere}</span></p>
       </footer>
     </div>
     <script src="../scripts/pwa.js"></script>

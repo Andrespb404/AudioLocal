@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro';
+import Coffee from './Coffee.astro';
+import ConversionLinks from './ConversionLinks.astro';
+import ConverterTool from './ConverterTool.astro';
+import Faq from './Faq.astro';
+import { conversionPath } from '../data/conversions.js';
+import { appJsonLd, ui } from '../i18n/ui.js';
+
+const { conversion, lang } = Astro.props;
+const text = ui[lang];
+const page = conversion[lang];
+const path = conversionPath(conversion, lang);
+---
+
+<Base
+  title={page.title}
+  description={page.description}
+  path={path}
+  alternate={conversionPath(conversion, text.otherLanguageCode)}
+  lang={lang}
+  active="convert"
+  ogImageAlt={page.name}
+  jsonLd={appJsonLd(lang, new URL(path, Astro.site).href, page.description)}
+>
+  <ConverterTool lang={lang} title={page.h1} preset={conversion.format} />
+  <Coffee lang={lang} />
+
+  <section class="card prose reveal info">
+    <p class="intro">{page.intro}</p>
+    <h2>{text.whenTitle}</h2>
+    <ul>
+      {page.when.map((item) => <li>{item}</li>)}
+    </ul>
+    <h2 class="next">{text.expectTitle}</h2>
+    <p>{page.expect}</p>
+  </section>
+
+  <ConversionLinks lang={lang} current={conversion.id} />
+  <Faq lang={lang} items={page.faq} />
+</Base>
+
+<style>
+  .info {
+    margin-top: 16px;
+  }
+
+  .intro {
+    margin: 0 0 20px;
+    color: var(--text);
+    font-size: 1.0625rem;
+  }
+
+  .next {
+    margin-top: 24px;
+  }
+</style>

@@ -1,0 +1,51 @@
+---
+import { conversionPath, conversions } from '../data/conversions.js';
+import { ui } from '../i18n/ui.js';
+
+const { lang, current } = Astro.props;
+const text = ui[lang];
+---
+
+<nav class="links card reveal" aria-labelledby="otherConversions">
+  <h2 class="section-title" id="otherConversions">{text.otherConversions}</h2>
+  <ul>
+    {
+      conversions
+        .filter((conversion) => conversion.id !== current)
+        .map((conversion) => (
+          <li>
+            <a href={conversionPath(conversion, lang)}>{conversion[lang].name}</a>
+          </li>
+        ))
+    }
+    {current && <li><a href={text.home}>{text.allFormats}</a></li>}
+  </ul>
+</nav>
+
+<style>
+  .links {
+    margin-top: 16px;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 20px;
+    margin-top: 8px;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+
+  a:hover {
+    color: var(--red-text);
+  }
+</style>

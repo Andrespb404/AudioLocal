@@ -1,13 +1,20 @@
+---
+import { ui } from '../i18n/ui.js';
+
+const { lang = 'es' } = Astro.props;
+const text = ui[lang];
+---
+
 <section class="queue card enter" id="filesSection" aria-labelledby="filesTitle" hidden>
   <div class="queue-head">
     <div class="queue-heading">
-      <h2 class="section-title" tabindex="-1" id="filesTitle">Archivos</h2>
+      <h2 class="section-title" tabindex="-1" id="filesTitle">{text.queue.title}</h2>
       <p class="queue-status">
         <span class="eq" id="statusEq" aria-hidden="true" hidden><i></i><i></i><i></i></span>
         <span id="queueStatus" role="status"></span>
       </p>
     </div>
-    <button type="button" class="btn" id="btnAddMore">Agregar más</button>
+    <button type="button" class="btn" id="btnAddMore">{text.queue.addMore}</button>
   </div>
 
   <ul class="queue-list" id="queueList"></ul>
@@ -24,10 +31,10 @@
         <progress class="sr-only" max="100" value="0" data-field="progress" hidden></progress>
       </div>
       <div class="queue-row-actions">
-        <button type="button" class="text-btn" data-action="retry" hidden>Reintentar</button>
-        <button type="button" class="text-btn" data-action="play">Escuchar</button>
-        <button type="button" class="text-btn" data-action="download" hidden>Descargar</button>
-        <button type="button" class="text-btn" data-action="remove">Quitar</button>
+        <button type="button" class="text-btn" data-action="retry" hidden>{text.queue.retry}</button>
+        <button type="button" class="text-btn" data-action="play">{text.queue.listen}</button>
+        <button type="button" class="text-btn" data-action="download" hidden>{text.queue.download}</button>
+        <button type="button" class="text-btn" data-action="remove">{text.queue.remove}</button>
       </div>
     </li>
   </template>

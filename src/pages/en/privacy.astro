@@ -1,0 +1,66 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  title="AudioLocal | Privacy"
+  description="AudioLocal's privacy policy. Your audio is converted directly in your browser, with no data sent to any server."
+  path="/en/privacy.html"
+  alternate="/privacy.html"
+  lang="en"
+  active="privacy"
+  ogTitle="AudioLocal — Privacy"
+  ogDescription="How AudioLocal handles your audio and your personal data."
+  ogImageAlt="Privacy at AudioLocal, local audio conversion"
+>
+  <article class="doc prose">
+    <h1 class="title">Your audio, your privacy</h1>
+    <p class="lead">With AudioLocal, everything happens in your browser. No audio leaves your device.</p>
+    <p class="updated-note">No uploads to servers · No sign-up or account · No tracking cookies · Open and inspectable code</p>
+
+    <section class="doc-section">
+      <h2>100% local processing</h2>
+      <p>AudioLocal converts your audio files (MP3, WAV, OGG, AAC, etc.) directly in your browser using the Web Audio API and JavaScript. Your files never leave your device, are not uploaded to any server, and are cleared automatically when you close the tab or reload the page.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2>Information we do NOT collect</h2>
+      <ul>
+        <li>Uploaded or converted audio files</li>
+        <li>IP address or geolocation data</li>
+        <li>Name, email or any other personal data</li>
+        <li>Conversion history</li>
+      </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2>Cookies and local storage</h2>
+      <p>We use <strong>localStorage</strong> only to save your conversion preferences (output format, channels, sample rate, etc.). These preferences stay in your browser, and you can delete them at any time.</p>
+      <p>To work offline, a <strong>service worker</strong> saves the site's files (pages, styles, scripts and fonts) in your browser's cache. It never saves your audio, and you can clear it from your browser settings.</p>
+      <p>We don't use tracking cookies or third-party advertising.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2>Donations (Ko-fi)</h2>
+      <p>This site accepts voluntary donations through <strong>Ko-fi</strong>. Clicking the donation link takes you to ko-fi.com, which has its own privacy policy. AudioLocal does not receive or store any payment data.</p>
+      <p>You can read Ko-fi's policy at: <a href="https://ko-fi.com/privacy" target="_blank" rel="noopener">ko-fi.com/privacy</a></p>
+    </section>
+
+    <section class="doc-section">
+      <h2>Third-party links</h2>
+      <p>This policy applies only to AudioLocal. We are not responsible for the privacy practices of other websites you may reach through links.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2>Site owner</h2>
+      <p>AudioLocal is an independent project.<br />Contact email: <a href="mailto:audiolocal.app@gmail.com">audiolocal.app@gmail.com</a></p>
+    </section>
+
+    <section class="doc-section">
+      <h2>Changes to this policy</h2>
+      <p>We may update this Privacy Policy from time to time. The current version will always be the one published on this page. The date of the last update appears at the end.</p>
+    </section>
+
+    <p class="updated-note">Last updated: November 4, 2026</p>
+  </article>
+</Base>
