@@ -13,7 +13,8 @@ async function cacheSite() {
 
   for (const entry of performance.getEntriesByType("resource")) {
     const url = new URL(entry.name);
-    if (url.origin === location.origin) urls.add(url.pathname);
+    // Solo archivos del sitio: las peticiones de Vercel Analytics no se pueden guardar y harían fallar todo el resultado.
+    if (url.origin === location.origin && /^\/(_astro|js|assets|pdfjs)\//.test(url.pathname)) urls.add(url.pathname);
   }
   for (const page of PAGES) {
     const html = await (await fetch(page)).text();
