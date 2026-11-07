@@ -1,6 +1,4 @@
-import { Zip, ZipPassThrough } from "fflate";
 import {
-  FORMAT_MAP,
   MAX_DURATION_SECONDS,
   channelsLabel,
   convertFile,
@@ -10,7 +8,7 @@ import {
   formatDuration,
   getAudioContext,
   getFileFormatLabel,
-  isOutputFormatSupported,
+  isVideoFile,
   sampleRateLabel,
   validateFile,
 } from "./audio.js";
@@ -19,6 +17,7 @@ import {
   conversionLabel,
   countByStatus,
   createItem,
+  errorSummary,
   hasUnsavedResults,
   outputName,
   requeue,
@@ -26,21 +25,23 @@ import {
   uniqueName,
 } from "./queue.js";
 import { t } from "./messages.js";
+import { audioSettings } from "./settings-audio.js";
+import { videoSettings } from "./settings-video.js";
+import { $, UserError, ZIP_MAX_BYTES, animateRowOut, bindFilePicker, saveFile, setRowButton, setText, showToast, zipBlobs } from "./shared-ui.js";
 
-const $ = (id) => document.getElementById(id);
-const SETTINGS_STORE = "audiolocal-settings";
-const ZIP_MAX_BYTES = 4 * 1024 ** 3;
-const ROW_LEAVE_MS = 220;
 const ZIP_DONE_MS = 2200;
-const EASE = "cubic-bezier(0.2, 0.8, 0.2, 1)";
+const TOOL = document.querySelector("[data-tool]").dataset.tool;
+const settings = TOOL === "video" ? videoSettings : audioSettings;
 
-const fileInput = $("fileInput");
-const typeRadios = [...document.querySelectorAll('input[name="format"]')];
-const qualityRadios = [...document.querySelectorAll('input[name="quality"]')];
-const channelsSelect = $("channels");
-const sampleRateSelect = $("sampleRate");
-const normalizeSelect = $("normalize");
-const keepSampleRateCheckbox = $("keepSampleRate");
+// Mediabunny es grande: se descarga solo al tratar un video. Sin WebCodecs, un video se decodifica como un audio.
+// Si falla, suele ser una pestaña abierta antes de un despliegue: ese archivo ya no existe.
+const loadVideoModule = () =>
+  import("./video.js").catch((err) => {
+    console.error(err);
+    throw new UserError(t.reloadNeeded);
+  });
+const usesVideoModule = (file) => TOOL === "video" || (isVideoFile(file) && typeof AudioDecoder !== "undefined");
+
 const queueList = $("queueList");
 const rowTemplate = $("queueRowTemplate");
 const btnConvert = $("btnConvert");
@@ -48,7 +49,6 @@ const btnCancel = $("btnCancel");
 const btnZip = $("btnZip");
 const btnAgain = $("btnAgain");
 const btnClear = $("btnClear");
-const toast = $("toast");
 
 const audio = $("playerAudio");
 const seek = $("playerSeek");
@@ -63,130 +63,20 @@ let selected = null;
 let zipLabel = null; // Texto temporal del botón: "Preparando ZIP…" o "Descargado"
 let zipLabelTimer = null;
 
-// ==================== UTILIDADES DE UI ====================
-function setText(element, text) {
-  // Evita que los lectores de pantalla repitan un estado que no cambió.
-  if (element.textContent !== text) element.textContent = text;
-}
-
-// Lee el token para que el JS y el CSS siempre coincidan sobre "reducir movimiento".
-const motionEnabled = () => getComputedStyle(document.documentElement).getPropertyValue("--rise").trim() !== "0px";
-
-function showToast(message, type = "info") {
-  toast.textContent = message;
-  toast.className = `toast ${type} show`;
-  clearTimeout(toast.timeoutId);
-  toast.timeoutId = setTimeout(() => toast.classList.remove("show"), 4000);
-}
-
-function saveFile(blob, name) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = name;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-// ==================== AJUSTES ====================
-function selectedFormat() {
-  const type = typeRadios.find((radio) => radio.checked)?.value ?? "wav";
-  if (type !== "mp3") return type;
-  return `mp3_${qualityRadios.find((radio) => radio.checked)?.value ?? 256}`;
-}
-
-function getSettings() {
-  return {
-    format: selectedFormat(),
-    channels: Number(channelsSelect.value),
-    sampleRate: Number(sampleRateSelect.value),
-    normalize: normalizeSelect.value === "1",
-    keepSampleRate: keepSampleRateCheckbox.checked,
-  };
-}
-
-// Las claves son las del sitio anterior, para conservar las preferencias ya guardadas.
-function saveSettings() {
-  const settings = {
-    mode: selectedFormat(),
-    colors: channelsSelect.value,
-    smooth: sampleRateSelect.value,
-    normalize: normalizeSelect.value,
-    keepSampleRate: keepSampleRateCheckbox.checked,
-  };
-  try {
-    localStorage.setItem(SETTINGS_STORE, JSON.stringify(settings));
-  } catch (err) {
-    console.warn("No se pudieron guardar las preferencias:", err);
-  }
-}
-
-function setSelect(select, value) {
-  if ([...select.options].some((option) => option.value === String(value))) select.value = value;
-}
-
-function checkRadio(radios, value) {
-  const radio = radios.find((candidate) => candidate.value === value);
-  if (radio) radio.checked = true;
-}
-
-function loadSettings() {
-  try {
-    const settings = JSON.parse(localStorage.getItem(SETTINGS_STORE));
-    if (!settings) return;
-    const [type, quality] = String(settings.mode).split("_");
-    checkRadio(typeRadios, type);
-    checkRadio(qualityRadios, quality);
-    setSelect(channelsSelect, settings.colors);
-    setSelect(sampleRateSelect, settings.smooth);
-    setSelect(normalizeSelect, settings.normalize);
-    if (typeof settings.keepSampleRate === "boolean") keepSampleRateCheckbox.checked = settings.keepSampleRate;
-  } catch (err) {
-    console.warn("No se pudieron cargar las preferencias guardadas:", err);
-  }
-}
-
-function syncSettingsControls() {
-  const formatInfo = FORMAT_MAP[selectedFormat()];
-  const isMp3 = formatInfo.type === "mp3";
-  const option96k = [...sampleRateSelect.options].find((option) => option.value === "96000");
-  option96k.disabled = isMp3; // MP3 no admite más de 48 kHz
-  if (isMp3 && sampleRateSelect.value === "96000") sampleRateSelect.value = "48000";
-  sampleRateSelect.disabled = keepSampleRateCheckbox.checked || Boolean(formatInfo.realtime);
-  $("qualityField").hidden = !isMp3;
-  $("formatNote").hidden = !formatInfo.realtime;
-}
-
-function markUnsupportedFormats() {
-  for (const radio of typeRadios) {
-    radio.disabled = radio.value !== "mp3" && !isOutputFormatSupported(radio.value);
-    if (!radio.disabled) continue;
-    radio.closest("label").querySelector("[data-detail]").textContent = t.unavailableHere;
-    if (radio.checked) checkRadio(typeRadios, "mp3");
-  }
-}
-
 // ==================== FILAS DE LA COLA ====================
-function rowMeta(item, settings) {
+function rowMeta(item, current) {
   if (item.status === STATUS.ERROR) return item.error;
   if (item.status === STATUS.ANALYZING) return t.analyzing;
   if (item.status === STATUS.CONVERTING) return `${item.stage || t.converting}… ${item.progress}%`;
 
   const duration = formatDuration(item.meta.duration);
   if (item.status === STATUS.DONE) {
-    const { format, blob } = item.result;
-    return `${format} · ${duration} · ${formatBytes(blob.size)} (${t.before(formatBytes(item.file.size))})`;
+    const { format, blob, warnings } = item.result;
+    return [`${format} · ${duration} · ${formatBytes(blob.size)} (${t.before(formatBytes(item.file.size))})`, ...warnings].join(" · ");
   }
-  const estimate = formatBytes(estimateOutputBytes(item.meta, settings));
-  return `${getFileFormatLabel(item.file)} · ${duration} · ${formatBytes(item.file.size)} → ≈ ${estimate}`;
-}
-
-// El texto visible va al inicio de la etiqueta, para que el control por voz lo encuentre.
-function setRowButton(button, label, fileName) {
-  setText(button, label);
-  button.setAttribute("aria-label", `${label} ${fileName}`);
+  const source = `${getFileFormatLabel(item.file)} · ${duration} · ${formatBytes(item.file.size)}`;
+  if (TOOL === "video") return `${getFileFormatLabel(item.file)} · ${duration} · ${item.meta.width}×${item.meta.height} · ${formatBytes(item.file.size)}`;
+  return `${source} → ≈ ${formatBytes(estimateOutputBytes(item.meta, current))}`;
 }
 
 function createRow(item, order = 0) {
@@ -205,7 +95,15 @@ function createRow(item, order = 0) {
   return row;
 }
 
-function updateRow(item, settings = getSettings()) {
+/** Un PDF en audio o video no es un error del archivo: lleva a la herramienta que lo admite. */
+function pdfToolLink() {
+  const link = document.createElement("a");
+  link.href = document.querySelector('a[href$="/pdf.html"]').href;
+  link.textContent = t.openPdfTool;
+  return link;
+}
+
+function updateRow(item, current = settings.get()) {
   const row = rows.get(item.id) ?? createRow(item);
   const { name } = item.file;
   const busy = item.status === STATUS.CONVERTING;
@@ -218,8 +116,11 @@ function updateRow(item, settings = getSettings()) {
   row.classList.toggle("is-error", isError);
   row.classList.toggle("is-selected", item === selected);
   row.classList.toggle("is-playing", playing);
+  row.classList.toggle("is-warned", isDone && item.result.warnings.length > 0);
   row.style.setProperty("--p", item.progress / 100);
-  row.querySelector('[data-field="meta"]').textContent = rowMeta(item, settings);
+  const meta = row.querySelector('[data-field="meta"]');
+  meta.textContent = rowMeta(item, current);
+  if (isError && /\.pdf$/i.test(name)) meta.append(" ", pdfToolLink());
   row.querySelector('[data-field="eq"]').hidden = !(busy || playing || item.status === STATUS.ANALYZING);
 
   const progress = row.querySelector('[data-field="progress"]');
@@ -228,7 +129,7 @@ function updateRow(item, settings = getSettings()) {
 
   const action = (actionName) => row.querySelector(`[data-action="${actionName}"]`);
   action("play").hidden = !item.meta;
-  setRowButton(action("play"), playing ? t.pause : t.listen, name);
+  setRowButton(action("play"), playing ? t.pause : TOOL === "video" ? t.watch : t.listen, name);
   action("download").hidden = !isDone;
   action("download").classList.toggle("is-saved", item.downloaded);
   setRowButton(action("download"), item.downloaded ? t.downloaded : t.download, name);
@@ -236,27 +137,9 @@ function updateRow(item, settings = getSettings()) {
   action("remove").disabled = busy;
 }
 
-// El DOM se limpia con un temporizador: si la pestaña no pinta, la animación no terminaría nunca.
-function animateRowOut(row) {
-  row.inert = true;
-  const style = getComputedStyle(row);
-  const keyframes = { opacity: [1, 0] };
-  if (motionEnabled()) {
-    Object.assign(keyframes, {
-      height: [`${row.offsetHeight}px`, "0px"],
-      minHeight: [style.minHeight, "0px"],
-      paddingTop: [style.paddingTop, "0px"],
-      paddingBottom: [style.paddingBottom, "0px"],
-      marginBottom: [style.marginBottom, "0px"],
-    });
-  }
-  row.animate(keyframes, { duration: ROW_LEAVE_MS, easing: EASE, fill: "forwards" });
-  setTimeout(() => row.remove(), ROW_LEAVE_MS);
-}
-
 function updateAllRows() {
-  const settings = getSettings();
-  items.forEach((item) => updateRow(item, settings));
+  const current = settings.get();
+  items.forEach((item) => updateRow(item, current));
 }
 
 // ==================== ESTADO DE LA PÁGINA ====================
@@ -305,7 +188,7 @@ function updateState() {
     if (counts.pending) parts.push(t.pendingCount(counts.pending));
     if (counts.done && state !== "done") parts.push(t.readyCount(counts.done));
   }
-  if (counts.error) parts.push(t.errorCount(counts.error));
+  if (counts.error) parts.push(errorSummary(items));
   setText($("queueStatus"), parts.join(" · "));
   $("statusEq").hidden = !(running || counts.analyzing);
 }
@@ -314,18 +197,23 @@ function updateState() {
 async function analyze(item) {
   if (!items.includes(item)) return;
   try {
-    const buffer = await decodeFile(item.file);
-    if (buffer.duration > MAX_DURATION_SECONDS) {
-      Object.assign(item, { status: STATUS.ERROR, error: t.tooLong });
+    if (usesVideoModule(item.file)) {
+      const { probeMedia } = await loadVideoModule();
+      Object.assign(item, { status: STATUS.PENDING, meta: await probeMedia(item.file, TOOL) });
     } else {
-      Object.assign(item, {
-        status: STATUS.PENDING,
-        meta: { duration: buffer.duration, sampleRate: buffer.sampleRate, channels: buffer.numberOfChannels },
-      });
+      const buffer = await decodeFile(item.file);
+      if (buffer.duration > MAX_DURATION_SECONDS) {
+        Object.assign(item, { status: STATUS.ERROR, error: t.tooLong });
+      } else {
+        Object.assign(item, {
+          status: STATUS.PENDING,
+          meta: { duration: buffer.duration, sampleRate: buffer.sampleRate, channels: buffer.numberOfChannels },
+        });
+      }
     }
   } catch (err) {
     console.error(err);
-    Object.assign(item, { status: STATUS.ERROR, error: t.unreadable });
+    Object.assign(item, { status: STATUS.ERROR, error: err instanceof UserError ? err.message : t.unreadable });
   }
   if (!items.includes(item)) return;
   updateRow(item);
@@ -335,7 +223,7 @@ async function analyze(item) {
 function addFiles(files) {
   const wasEmpty = items.length === 0;
   [...files].forEach((file, order) => {
-    const rejection = validateFile(file);
+    const rejection = validateFile(file, TOOL);
     const item = createItem(nextId++, file, rejection);
     items.push(item);
     createRow(item, order);
@@ -371,25 +259,37 @@ async function startConversion() {
   const hadFocus = document.activeElement === btnConvert;
   converting = new AbortController();
   const { signal } = converting;
-  const settings = getSettings();
+  const current = settings.get();
   updateState();
   if (hadFocus) btnCancel.focus();
   // Debe pedirse durante el clic; sin await porque solo OGG y AAC necesitan el contexto en marcha.
-  getAudioContext().resume().catch(console.warn);
+  if (TOOL === "audio") getAudioContext().resume().catch(console.warn);
 
   await runQueue(
     items,
     async (item) => {
-      const result = await convertFile(item.file, settings, {
+      // Además del aviso pasajero, quedan en la fila: cambian lo que el usuario se lleva.
+      const warnings = [];
+      const warn = (message) => {
+        warnings.push(message);
+        showToast(message, "warning");
+      };
+      const report = {
         signal,
-        onWarning: (message) => showToast(message, "warning"),
+        onWarning: warn,
         onProgress: (progress, stage) => {
           item.progress = progress;
           item.stage = stage;
           updateRow(item);
         },
-      });
-      return { ...result, url: URL.createObjectURL(result.blob), name: outputName(item.file.name, result.ext) };
+      };
+      let result;
+      if (TOOL === "video") result = await (await loadVideoModule()).convertVideo(item.file, current, report);
+      else if (usesVideoModule(item.file) || (current.format === "ogg" && current.opusEncoder)) result = await (await loadVideoModule()).extractAudio(item.file, current, report);
+      else result = await convertFile(item.file, current, report);
+      // Con margen: cambiar de contenedor sin recodificar puede sumar unos pocos KB, y eso no merece un aviso.
+      if (TOOL === "video" && result.blob.size > item.file.size * 1.05) warn(t.largerResult);
+      return { ...result, warnings, url: URL.createObjectURL(result.blob), name: outputName(item.file.name, result.ext) };
     },
     {
       signal,
@@ -436,7 +336,6 @@ function setZipLabel(text, clearAfter = 0) {
   if (clearAfter) zipLabelTimer = setTimeout(() => setZipLabel(null), clearAfter);
 }
 
-// shortcut: fflate no escribe ZIP64, así que el total se limita a 4 GB; cambiar de librería si hace falta más.
 async function downloadAll() {
   const done = items.filter((item) => item.status === STATUS.DONE);
   if (done.length === 1) {
@@ -451,19 +350,9 @@ async function downloadAll() {
   $("zipEq").hidden = false;
   setZipLabel(t.zipPreparing);
   try {
-    const parts = [];
-    const zip = new Zip((err, chunk) => {
-      if (err) throw err;
-      parts.push(chunk);
-    });
     const taken = new Set();
-    for (const item of done) {
-      const entry = new ZipPassThrough(uniqueName(item.result.name, taken));
-      zip.add(entry);
-      entry.push(new Uint8Array(await item.result.blob.arrayBuffer()), true);
-    }
-    zip.end();
-    saveFile(new Blob(parts, { type: "application/zip" }), "AudioLocal.zip");
+    const zip = await zipBlobs(done.map((item) => ({ name: uniqueName(item.result.name, taken), blob: item.result.blob })));
+    saveFile(zip, "AudioLocal.zip");
     done.forEach((item) => (item.downloaded = true));
     updateAllRows();
     setZipLabel(t.downloaded, ZIP_DONE_MS);
@@ -482,9 +371,11 @@ const source = () => sourceRadios.find((radio) => radio.checked).value;
 
 function playerMetaText(item) {
   if (source() === "converted" && item.result) {
-    const { format, sampleRate, channels, blob } = item.result;
+    const { format, sampleRate, channels, blob, width, height } = item.result;
+    if (TOOL === "video") return `${format} · ${width}×${height} · ${formatBytes(blob.size)}`;
     return `${format} · ${sampleRateLabel(sampleRate)} · ${channelsLabel(channels)} · ${formatBytes(blob.size)}`;
   }
+  if (TOOL === "video") return `${getFileFormatLabel(item.file)} · ${item.meta.width}×${item.meta.height} · ${formatBytes(item.file.size)}`;
   return `${getFileFormatLabel(item.file)} · ${channelsLabel(item.meta.channels)} · ${formatBytes(item.file.size)}`;
 }
 
@@ -560,43 +451,12 @@ function syncPlayState() {
 }
 
 // ==================== EVENTOS ====================
-const openPicker = () => fileInput.click();
-$("dropzone").addEventListener("click", openPicker);
-$("btnAddMore").addEventListener("click", openPicker);
-fileInput.addEventListener("change", () => {
-  addFiles(fileInput.files);
-  fileInput.value = "";
-});
+bindFilePicker(addFiles, t.dropHere);
 
-const dropzoneTitle = $("dropzoneTitle");
-const DROPZONE_TEXT = dropzoneTitle.textContent;
-
-function setDragging(dragging) {
-  document.body.classList.toggle("drag-over", dragging);
-  setText(dropzoneTitle, dragging ? t.dropHere : DROPZONE_TEXT);
-}
-
-// La página entera recibe archivos: soltarlos fuera de la tarjeta no debe hacer que el navegador navegue a ellos.
-const carriesFiles = (event) => event.dataTransfer?.types.includes("Files");
-document.addEventListener("dragover", (event) => {
-  if (!carriesFiles(event)) return;
-  event.preventDefault();
-  setDragging(true);
-});
-document.addEventListener("dragleave", (event) => {
-  if (!event.relatedTarget) setDragging(false);
-});
-document.addEventListener("drop", (event) => {
-  if (!carriesFiles(event)) return;
-  event.preventDefault();
-  setDragging(false);
-  addFiles(event.dataTransfer.files);
-});
-
-[...typeRadios, ...qualityRadios, channelsSelect, sampleRateSelect, normalizeSelect, keepSampleRateCheckbox].forEach((element) => {
+settings.controls.forEach((element) => {
   element.addEventListener("change", () => {
-    syncSettingsControls();
-    saveSettings();
+    settings.sync();
+    settings.save();
     updateAllRows();
   });
 });
@@ -622,13 +482,16 @@ queueList.addEventListener("click", (event) => {
       updateState();
       break;
     case "remove":
-      removeItem(item);
+      if (!hasUnsavedResults([item]) || confirm(t.confirmRemove)) removeItem(item);
       break;
   }
 });
 
 btnConvert.addEventListener("click", startConversion);
-btnCancel.addEventListener("click", () => converting?.abort());
+// Cancelar aparece bajo el cursor al convertir: el segundo clic de un doble clic no debe cancelar.
+btnCancel.addEventListener("click", (event) => {
+  if (event.detail < 2) converting?.abort();
+});
 btnZip.addEventListener("click", downloadAll);
 btnAgain.addEventListener("click", convertAgain);
 btnClear.addEventListener("click", () => {
@@ -682,9 +545,10 @@ addEventListener("beforeunload", (event) => {
 });
 
 // ==================== INICIO ====================
-loadSettings();
-// Las páginas por conversión fijan el destino sin tocar las preferencias guardadas.
-checkRadio(typeRadios, document.querySelector("[data-preset]")?.dataset.preset);
-markUnsupportedFormats();
-syncSettingsControls();
+settings.load();
+settings.prepare().catch(console.warn).finally(() => {
+  settings.sync();
+  updateAllRows();
+});
+settings.sync();
 updateState();

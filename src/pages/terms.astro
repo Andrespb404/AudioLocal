@@ -3,16 +3,17 @@ import Base from '../layouts/Base.astro';
 
 const sections = [
   { title: '1. Aceptación de los Términos', text: 'Al acceder y utilizar AudioLocal aceptas estos Términos y Condiciones. Si no estás de acuerdo, por favor no uses el servicio.' },
-  { title: '2. Descripción del Servicio', text: 'AudioLocal es una herramienta web que permite convertir archivos de audio directamente en el navegador del usuario. Todo el procesamiento se realiza de forma local.' },
+  { title: '2. Descripción del Servicio', text: 'AudioLocal es una herramienta web que permite convertir archivos de audio, video y PDF directamente en el navegador del usuario. Hoy, todo el procesamiento se realiza de forma local.' },
   {
     title: '3. Uso del Servicio',
     items: [
       'Está prohibido usar el servicio para fines ilegales o que infrinjan derechos de terceros.',
       'El usuario es el único responsable del contenido de los archivos que procesa.',
-      'No está permitido intentar extraer, modificar o revertir el código fuente del convertidor.',
+      'No uses el servicio para eludir protecciones técnicas de contenidos (DRM).',
+      'No está permitido atacar ni sobrecargar el sitio. Nada en estos términos limita los derechos que te dan las licencias de sus componentes.',
     ],
   },
-  { title: '4. Propiedad Intelectual', text: 'Todo el contenido, diseño y código de AudioLocal pertenece a sus desarrolladores. Se concede un permiso limitado, revocable y no exclusivo para uso personal.' },
+  { title: '4. Propiedad Intelectual', text: 'El contenido, el diseño y el código propios de AudioLocal pertenecen a sus desarrolladores. Los componentes de terceros conservan sus licencias, listadas en la página de Licencias. Se concede un permiso limitado, revocable y no exclusivo para usar el sitio. Las marcas de terceros que se mencionan pertenecen a sus dueños, y AudioLocal no está afiliado a ellos. AudioLocal no otorga licencias de patentes sobre formatos de archivo: ciertos usos comerciales pueden requerir la tuya.' },
   {
     title: '5. Limitación de Responsabilidad',
     text: 'El servicio se ofrece "tal cual" sin garantías de ningún tipo. No nos hacemos responsables por:',
@@ -26,17 +27,17 @@ const sections = [
 
 <Base
   title="AudioLocal | Términos y Condiciones"
-  description="Términos y Condiciones de uso de AudioLocal, el convertidor de audio local que opera en tu navegador."
+  description="Términos y Condiciones de uso de AudioLocal, la herramienta para convertir audio, video y PDF en tu navegador."
   path="/terms.html"
   alternate="/en/terms.html"
   active="terms"
-  ogDescription="Términos de uso del convertidor de audio local"
-  ogImageAlt="Términos de AudioLocal, servicio de conversión de audio local"
-  twitterDescription="Consulta los términos de uso del convertidor de audio local y privado AudioLocal."
+  ogDescription="Términos de uso de AudioLocal"
+  ogImageAlt="Términos de AudioLocal"
+  twitterDescription="Consulta los términos de uso de AudioLocal."
 >
   <article class="doc prose">
     <h1 class="title">Términos y Condiciones</h1>
-    <p class="lead">Última actualización: 20 de mayo de 2026</p>
+    <p class="lead">Última actualización: 6 de noviembre de 2026</p>
 
     {
       sections.map((section) => (
@@ -50,7 +51,7 @@ const sections = [
 
     <section class="doc-section">
       <h2>Contacto</h2>
-      <p>Cualquier consulta sobre estos términos puede enviarse a: <a href="mailto:audiolocal.app@gmail.com">audiolocal.app@gmail.com</a></p>
+      <p>Cualquier consulta sobre estos términos, incluidos los avisos de infracción de derechos, puede enviarse a: <a href="mailto:audiolocal.app@gmail.com">audiolocal.app@gmail.com</a></p>
     </section>
   </article>
 </Base>

@@ -1,0 +1,57 @@
+---
+import { readFileSync } from 'node:fs';
+import Base from '../layouts/Base.astro';
+import { components } from '../data/licenses.js';
+import { ui } from '../i18n/ui.js';
+
+const { lang } = Astro.props;
+const text = ui[lang].licenses;
+const versionOf = (pkg) => JSON.parse(readFileSync(`node_modules/${pkg}/package.json`, 'utf8')).version;
+const entries = components.map((component) => ({
+  ...component,
+  version: component.version ?? (component.pkg && versionOf(component.pkg)),
+  texts: component.files.map((file) => readFileSync(file, 'utf8')),
+}));
+---
+
+<Base
+  title={text.title}
+  description={text.description}
+  path={text.path}
+  alternate={ui[ui[lang].otherLanguageCode].licenses.path}
+  lang={lang}
+  active="licenses"
+  ogDescription={text.description}
+>
+  <article class="doc prose">
+    <h1 class="title">{text.heading}</h1>
+    <p class="lead">{text.lead}</p>
+    <p>{text.lame} <a href="/js/lame.min.js">/js/lame.min.js</a></p>
+
+    {
+      entries.map((entry) => (
+        <section class="doc-section">
+          <h2>{entry.name}{entry.version && ` ${entry.version}`}</h2>
+          <p>{text.license}: {entry.license}</p>
+          <ul>{entry.links.map((link) => <li><a href={link} target="_blank" rel="noopener">{link}</a></li>)}</ul>
+          <details>
+            <summary>{text.fullText}</summary>
+            {entry.texts.map((licenseText) => <pre class="license-text">{licenseText}</pre>)}
+          </details>
+        </section>
+      ))
+    }
+  </article>
+</Base>
+
+<style>
+  .license-text {
+    max-height: 24rem;
+    margin-top: 12px;
+    overflow: auto;
+    color: var(--muted);
+    font-size: 0.75rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+</style>

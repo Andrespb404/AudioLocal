@@ -1,0 +1,66 @@
+---
+import { ui } from '../i18n/ui.js';
+
+const { lang = 'es' } = Astro.props;
+const text = ui[lang].pdfOptions;
+---
+
+<section class="options card enter enter-1" id="optionsSection" aria-label={text.optionsLabel} hidden>
+  <div id="imageOptions">
+    <div class="row-field first">
+      <span class="field-label" id="imageFormatLabel">{text.imageFormat}</span>
+      <div class="seg seg-quiet seg-options image-formats" role="radiogroup" aria-labelledby="imageFormatLabel">
+        <span class="seg-slider" aria-hidden="true"></span>
+        <label>
+          <input class="sr-only" type="radio" name="imageFormat" value="jpg" checked />
+          <span class="option-box">JPG</span>
+        </label>
+        <label>
+          <input class="sr-only" type="radio" name="imageFormat" value="png" />
+          <span class="option-box">PNG</span>
+        </label>
+      </div>
+    </div>
+    <div class="field dpi-field">
+      <label class="field-label" for="pdfDpi">{text.resolution}</label>
+      <select id="pdfDpi">
+        <option value="96">{text.dpi96}</option>
+        <option value="150" selected>{text.dpi150}</option>
+        <option value="300">{text.dpi300}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field" id="splitOptions" hidden>
+    <label class="field-label" for="pdfRanges">{text.ranges}</label>
+    <input type="text" id="pdfRanges" inputmode="numeric" autocomplete="off" placeholder={text.rangesPlaceholder} aria-describedby="rangesHint" />
+    <p class="hint" id="rangesHint" aria-live="polite">{text.rangesHint}</p>
+  </div>
+</section>
+
+<style>
+  .first {
+    margin-top: 0;
+  }
+
+  .image-formats {
+    --cols: 2;
+  }
+
+  .dpi-field {
+    margin-top: 16px;
+  }
+
+  .hint {
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+
+  input[aria-invalid='true'] {
+    border-color: var(--warning);
+  }
+
+  input[aria-invalid='true'] + .hint {
+    color: var(--warning);
+  }
+</style>

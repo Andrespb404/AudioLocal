@@ -6,28 +6,25 @@ import ConverterTool from './ConverterTool.astro';
 import Faq from './Faq.astro';
 import { appJsonLd, ui } from '../i18n/ui.js';
 
-const { lang } = Astro.props;
+const { lang, tool = 'audio' } = Astro.props;
 const text = ui[lang];
-const page = text.homePage;
-const path = text.home;
+const page = text.tools[tool];
+const url = new URL(page.path, Astro.site).href;
+const schemas = [appJsonLd(lang, url, page.description)];
+if (tool === 'audio') schemas.unshift({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'AudioLocal', url, inLanguage: lang, description: page.description });
 ---
 
 <Base
   title={page.title}
   description={page.description}
-  path={path}
-  alternate={ui[text.otherLanguageCode].home}
+  path={page.path}
+  alternate={ui[text.otherLanguageCode].tools[tool].path}
   lang={lang}
-  active="convert"
-  ogDescription={page.ogDescription}
-  ogImageAlt={page.ogImageAlt}
-  twitterDescription={page.twitterDescription}
-  jsonLd={[
-    { '@context': 'https://schema.org', '@type': 'WebSite', name: 'AudioLocal', url: new URL(path, Astro.site).href, inLanguage: lang, description: page.appDescription },
-    appJsonLd(lang, new URL(path, Astro.site).href, page.appDescription),
-  ]}
+  active={tool}
+  ogImageAlt={text.ogImageAlt}
+  jsonLd={schemas}
 >
-  <ConverterTool lang={lang} title={page.h1} />
+  <ConverterTool lang={lang} tool={tool} title={page.h1} />
   <Coffee lang={lang} />
 
   <section class="features" aria-label={text.featuresLabel}>
@@ -41,7 +38,7 @@ const path = text.home;
     }
   </section>
 
-  <ConversionLinks lang={lang} />
+  <ConversionLinks lang={lang} tool={tool} />
 
   <section class="card prose reveal seo">
     <h2>{page.seoTitle}</h2>
@@ -49,9 +46,6 @@ const path = text.home;
     <ul>
       {page.seoList.map((item) => <li>{item}</li>)}
     </ul>
-
-    <h3>{page.wavTitle}</h3>
-    <p>{page.wavText}</p>
   </section>
 
   <Faq lang={lang} items={page.faq} />

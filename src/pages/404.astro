@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import { ui } from '../i18n/ui.js';
+
+const { notFound: es, home: esHome } = ui.es;
+const { notFound: en, home: enHome } = ui.en;
+---
+
+<Base title={es.title} description={es.description} path="/404.html" alternate="/404.html" active="404" ogImageAlt={es.title} noindex>
+  <article class="doc prose">
+    <h1 class="title">{es.heading}</h1>
+    <p class="lead">{es.lead}</p>
+    <p><a href={esHome}>{es.home}</a></p>
+    <section class="doc-section" lang="en">
+      <h2>{en.heading}</h2>
+      <p>{en.lead}</p>
+      <p><a href={enHome}>{en.home}</a></p>
+    </section>
+  </article>
+</Base>

@@ -24,7 +24,8 @@ test("cada conversión tiene contenido completo y URL única en ambos idiomas", 
   const paths = new Set();
   const titles = new Set();
   for (const conversion of conversions) {
-    assert.ok(FORMAT_MAP[conversion.format === "mp3" ? "mp3_256" : conversion.format], conversion.id);
+    if (conversion.tool === "audio") assert.ok(FORMAT_MAP[conversion.format === "mp3" ? "mp3_256" : conversion.format], conversion.id);
+    assert.ok(["audio", "video", "pdf"].includes(conversion.tool), conversion.id);
     for (const lang of ["es", "en"]) {
       const page = conversion[lang];
       for (const field of ["name", "title", "description", "h1", "intro", "expect"]) assert.ok(page[field], `${conversion.id} ${lang} ${field}`);

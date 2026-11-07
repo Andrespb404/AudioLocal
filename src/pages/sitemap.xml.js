@@ -1,6 +1,6 @@
 import { conversionPath, conversions } from '../data/conversions.js';
 
-const staticPaths = ['/', '/about.html', '/privacy.html', '/terms.html', '/en.html', '/en/about.html', '/en/privacy.html', '/en/terms.html'];
+const staticPaths = ['/', '/video.html', '/pdf.html', '/about.html', '/privacy.html', '/terms.html', '/licenses.html', '/en.html', '/en/video.html', '/en/pdf.html', '/en/about.html', '/en/privacy.html', '/en/terms.html', '/en/licenses.html'];
 
 export function GET({ site }) {
   const paths = [...staticPaths, ...conversions.flatMap((conversion) => [conversionPath(conversion, 'es'), conversionPath(conversion, 'en')])];

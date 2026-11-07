@@ -4,6 +4,7 @@ import {
   STATUS,
   conversionLabel,
   createItem,
+  errorSummary,
   hasUnsavedResults,
   outputName,
   requeue,
@@ -99,10 +100,16 @@ test("el avance del lote cuenta el archivo en curso", () => {
 });
 
 test("los nombres de salida no se repiten ni traen rutas", () => {
-  assert.equal(outputName("tema.final.wav", "mp3"), "tema.final (Converted).mp3");
-  assert.equal(outputName("../../evil.wav", "mp3"), ".._.._evil (Converted).mp3");
+  assert.equal(outputName("tema.final.wav", "mp3"), "tema.final (Convertido).mp3");
+  assert.equal(outputName("../../evil.wav", "mp3"), ".._.._evil (Convertido).mp3");
   const taken = new Set();
   assert.equal(uniqueName("a (Converted).mp3", taken), "a (Converted).mp3");
   assert.equal(uniqueName("A (Converted).MP3", taken), "A (Converted) 2.MP3");
   assert.equal(uniqueName("a (Converted).mp3", taken), "a (Converted) 3.mp3");
+});
+
+test("el resumen de errores da la causa sin repetirla", () => {
+  const failed = (error) => ({ status: STATUS.ERROR, error });
+  assert.equal(errorSummary([{ status: STATUS.DONE }]), "");
+  assert.equal(errorSummary([failed("Dañado."), failed("Dañado."), failed("Muy grande.")]), "3 con error: Dañado. Muy grande.");
 });

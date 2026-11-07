@@ -1,11 +1,12 @@
 ---
 import { ui } from '../i18n/ui.js';
 
-const { lang = 'es' } = Astro.props;
+const { lang = 'es', tool = 'audio' } = Astro.props;
 const text = ui[lang];
 ---
 
 <section class="player" id="player" aria-label={text.player.label} hidden>
+  {tool === 'video' && <video id="playerAudio" class="player-video" preload="metadata" playsinline />}
   <div class="player-inner">
     <button type="button" class="play-btn" id="btnPlay" aria-label={text.player.play}>
       <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
@@ -38,7 +39,7 @@ const text = ui[lang];
 
     <button type="button" class="text-btn player-close" id="btnPlayerClose" aria-label={text.player.closeLabel}>{text.player.close}</button>
   </div>
-  <audio id="playerAudio" preload="metadata"></audio>
+  {tool !== 'video' && <audio id="playerAudio" preload="metadata" />}
 </section>
 
 <style>
@@ -51,6 +52,20 @@ const text = ui[lang];
     border-top: 1px solid var(--line);
     background: var(--surface);
     animation: slide-up 0.35s var(--ease) backwards;
+  }
+
+  .player-video {
+    display: block;
+    width: 100%;
+    max-height: 38dvh;
+    background: #000;
+  }
+
+  /* En el celular, el video no debe tapar las acciones de la lista. */
+  @media (max-width: 559px) {
+    .player-video {
+      max-height: 28dvh;
+    }
   }
 
   .player-inner {

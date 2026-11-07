@@ -25,6 +25,11 @@ const text = ui[lang];
     margin-top: 16px;
   }
 
+  /* Se pide apoyo cuando ya sirvió de algo, no antes de usarlo. */
+  :global(body:not([data-state='done'])) .coffee {
+    display: none;
+  }
+
   .coffee-title {
     font-size: 1.0625rem;
     font-weight: 600;

@@ -8,7 +8,8 @@ const text = ui[lang];
 <section class="queue card enter" id="filesSection" aria-labelledby="filesTitle" hidden>
   <div class="queue-head">
     <div class="queue-heading">
-      <h2 class="section-title" tabindex="-1" id="filesTitle">{text.queue.title}</h2>
+      <!-- aria-live: el título cambia a "Tu archivo está listo" y así se anuncia el final. -->
+      <h2 class="section-title" tabindex="-1" id="filesTitle" aria-live="polite">{text.queue.title}</h2>
       <p class="queue-status">
         <span class="eq" id="statusEq" aria-hidden="true" hidden><i></i><i></i><i></i></span>
         <span id="queueStatus" role="status"></span>
@@ -31,6 +32,7 @@ const text = ui[lang];
         <progress class="sr-only" max="100" value="0" data-field="progress" hidden></progress>
       </div>
       <div class="queue-row-actions">
+        <button type="button" class="text-btn" data-action="up" hidden>{text.queue.up}</button>
         <button type="button" class="text-btn" data-action="retry" hidden>{text.queue.retry}</button>
         <button type="button" class="text-btn" data-action="play">{text.queue.listen}</button>
         <button type="button" class="text-btn" data-action="download" hidden>{text.queue.download}</button>
@@ -155,8 +157,13 @@ const text = ui[lang];
     line-height: 1.35;
   }
 
-  .queue-row.is-error .queue-meta {
+  .queue-row.is-error .queue-meta,
+  .queue-row.is-warned .queue-meta {
     color: var(--warning);
+  }
+
+  .queue-meta a {
+    color: inherit;
   }
 
   .queue-row.is-busy .queue-meta,

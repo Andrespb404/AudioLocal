@@ -10,13 +10,14 @@ interface Props {
   path: string;
   alternate: string;
   lang?: 'es' | 'en';
-  active: 'convert' | 'about' | 'privacy' | 'terms';
+  active: 'audio' | 'video' | 'pdf' | 'about' | 'privacy' | 'terms';
   ogTitle?: string;
   ogDescription?: string;
   ogImageAlt: string;
   twitterTitle?: string;
   twitterDescription?: string;
   jsonLd?: object | object[];
+  noindex?: boolean;
 }
 
 const {
@@ -32,6 +33,7 @@ const {
   twitterTitle = ogTitle,
   twitterDescription = ogDescription,
   jsonLd,
+  noindex = false,
 } = Astro.props;
 
 const text = ui[lang];
@@ -39,7 +41,7 @@ const canonical = new URL(path, Astro.site).href;
 const alternateUrl = new URL(alternate, Astro.site).href;
 const esUrl = lang === 'es' ? canonical : alternateUrl;
 const enUrl = lang === 'en' ? canonical : alternateUrl;
-const ogImage = new URL('/assets/audiolocal_og.png', Astro.site).href;
+const ogImage = new URL(lang === 'en' ? '/assets/audiolocal_og_en.png' : '/assets/audiolocal_og.png', Astro.site).href;
 ---
 
 <!doctype html>
@@ -51,6 +53,7 @@ const ogImage = new URL('/assets/audiolocal_og.png', Astro.site).href;
     <meta name="robots" content="index,follow" />
     <meta name="description" content={description} />
     <meta name="author" content="AudioLocal" />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta name="theme-color" content="#0c0c0d" />
 
     <meta property="og:locale" content={text.ogLocale} />
@@ -73,7 +76,7 @@ const ogImage = new URL('/assets/audiolocal_og.png', Astro.site).href;
     <link rel="icon" href="/assets/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="manifest" href={lang === 'en' ? '/manifest.en.webmanifest' : '/manifest.webmanifest'} />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
 
@@ -85,7 +88,7 @@ const ogImage = new URL('/assets/audiolocal_og.png', Astro.site).href;
       </main>
       <footer class="site-footer">
         <div class="footer-links">
-          {text.nav.slice(1).map((link) => <a href={link.href}>{link.label}</a>)}
+          {text.footerNav.map((link) => <a href={link.href}>{link.label}</a>)}
           <a href="https://ko-fi.com/audiolocal" target="_blank" rel="noopener">{text.coffee}</a>
         </div>
         <p>© 2026 AudioLocal · <span id="offlineStatus" role="status">{text.processedHere}</span></p>

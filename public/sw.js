@@ -1,5 +1,5 @@
 // Red primero, caché como respaldo: los usuarios siempre reciben la última versión si tienen conexión.
-const CACHE_NAME = "audiolocal-v1";
+const CACHE_NAME = "audiolocal-v2";
 
 self.addEventListener("install", () => self.skipWaiting());
 
@@ -15,7 +15,8 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;
-  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+  const url = new URL(request.url);
+  if (request.method !== "GET" || url.origin !== self.location.origin) return;
 
   event.respondWith(
     (async () => {
@@ -23,14 +24,15 @@ self.addEventListener("fetch", (event) => {
         const response = await fetch(request);
         if (response.ok) {
           const copy = response.clone();
-          event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)));
+          // Por ruta, sin la query: "/?utm=x" y "/" son la misma página, y una copia vieja no debe sobrevivir a un despliegue.
+          event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(url.pathname, copy)));
         }
         return response;
       } catch (err) {
-        const cached = await caches.match(request, { ignoreSearch: true });
+        const cached = await caches.match(url.pathname);
         if (cached) return cached;
         if (request.mode === "navigate") {
-          const home = await caches.match("/");
+          const home = await caches.match(url.pathname.startsWith("/en") ? "/en.html" : "/");
           if (home) return home;
         }
         throw err;
