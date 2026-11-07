@@ -1,7 +1,7 @@
 {
   "name": "AudioLocal",
   "short_name": "AudioLocal",
-  "description": "Convertidor de audio 100% local. Tus archivos nunca salen de tu dispositivo.",
+  "description": "Convierte audio, video y PDF gratis, sin registro y sin anuncios.",
   "lang": "es",
   "start_url": "/",
   "display": "standalone",

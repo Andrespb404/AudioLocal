@@ -1,0 +1,81 @@
+---
+import { ui } from '../i18n/ui.js';
+
+const { lang = 'es', preset, presetQuality } = Astro.props;
+const text = ui[lang].videoOptions;
+const initialContainer = preset ?? 'mp4';
+const initialQuality = presetQuality ?? 'same';
+const containers = [
+  { value: 'mp4', name: 'MP4', detail: text.mp4 },
+  { value: 'webm', name: 'WebM', detail: text.webm },
+];
+const qualities = ['same', 'high', 'medium', 'low'];
+const heights = [0, 1080, 720, 480];
+---
+
+<section class="options card enter enter-1" id="optionsSection" aria-labelledby="formatTitle" hidden>
+  <h2 class="section-title" id="formatTitle" tabindex="-1">{text.convertTo}</h2>
+
+  <div class="seg containers" role="radiogroup" aria-labelledby="formatTitle" data-preset={preset} data-preset-quality={presetQuality}>
+    <span class="seg-slider" aria-hidden="true"></span>
+    {
+      containers.map((container) => (
+        <label>
+          <input class="sr-only" type="radio" name="videoContainer" value={container.value} checked={container.value === initialContainer} />
+          <span class="choice-box">
+            <span class="choice-name">{container.name}</span>
+            <span class="choice-detail" data-detail>{container.detail}</span>
+          </span>
+        </label>
+      ))
+    }
+  </div>
+
+  <div class="row-field">
+    <span class="field-label" id="videoQualityLabel">{text.quality}</span>
+    <div class="seg seg-quiet seg-options qualities" role="radiogroup" aria-labelledby="videoQualityLabel">
+      <span class="seg-slider" aria-hidden="true"></span>
+      {
+        qualities.map((quality) => (
+          <label>
+            <input class="sr-only" type="radio" name="videoQuality" value={quality} checked={quality === initialQuality} />
+            <span class="option-box">{text.qualities[quality]}</span>
+          </label>
+        ))
+      }
+    </div>
+  </div>
+
+  <p class="note">{text.qualityNote}</p>
+  <p class="note">{text.dropped}</p>
+  <p class="note" id="videoNote" hidden>{text.noEncoders}</p>
+
+  <div class="field height-field">
+    <label class="field-label" for="videoHeight">{text.resolution}</label>
+    <select id="videoHeight">
+      {heights.map((height) => <option value={height}>{height ? `${height}p` : text.originalResolution}</option>)}
+    </select>
+  </div>
+</section>
+
+<style>
+  .containers {
+    --cols: 2;
+    margin-top: 16px;
+  }
+
+  .qualities {
+    --cols: 4;
+  }
+
+  .height-field {
+    margin-top: 16px;
+  }
+
+  @media (max-width: 559px) {
+    .qualities :global(.option-box) {
+      padding: 0 4px;
+      font-size: 0.8125rem;
+    }
+  }
+</style>

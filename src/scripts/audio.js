@@ -3,6 +3,7 @@
 import { t } from "./messages.js";
 
 export const MAX_FILE_SIZE = 150 * 1024 * 1024; // 150 MB
+export const MAX_VIDEO_SIZE = 2 * 1024 ** 3; // 2 GB: se lee por partes, sin cargarlo completo en memoria
 export const MAX_DURATION_SECONDS = 20 * 60;
 export const VALID_SAMPLE_RATES = [8000, 11025, 16000, 22050, 44100, 48000, 96000];
 const MP3_MAX_SAMPLE_RATE = 48000;
@@ -22,7 +23,9 @@ const SUPPORTED_AUDIO_TYPES = [
   "audio/flac",
   "audio/x-flac",
 ];
-const SUPPORTED_FILE_EXTENSIONS = ["mp3", "wav", "ogg", "aac", "m4a", "webm", "flac"];
+const SUPPORTED_FILE_EXTENSIONS = ["mp3", "wav", "ogg", "aac", "m4a", "flac"];
+const VIDEO_EXTENSIONS = ["mp4", "m4v", "mov", "mkv", "webm", "ts"];
+const UNSUPPORTED_VIDEO_TYPES = ["video/x-msvideo", "video/avi", "video/x-ms-wmv", "video/x-flv"];
 
 export const FORMAT_MAP = {
   wav: { ext: "wav", type: "wav", bitrate: null },
@@ -65,21 +68,35 @@ export function isSupportedAudioFile(file) {
   return SUPPORTED_FILE_EXTENSIONS.includes(getFileExtension(file));
 }
 
-/** Motivo de rechazo de un archivo, o null si es válido. */
-export function validateFile(file) {
-  if (!isSupportedAudioFile(file)) return t.invalidFormat;
-  if (file.size > MAX_FILE_SIZE) return t.tooLarge;
-  return null;
+export function isVideoFile(file) {
+  if (UNSUPPORTED_VIDEO_TYPES.includes(file.type)) return false;
+  return VIDEO_EXTENSIONS.includes(getFileExtension(file)) || file.type.startsWith("video/");
+}
+
+/**
+ * Motivo de rechazo de un archivo, o null si es válido.
+ * `streaming`: el navegador puede leer video por partes. Sin eso, un video se decodifica completo como un audio.
+ */
+export function validateFile(file, tool = "audio", streaming = typeof AudioDecoder !== "undefined") {
+  const video = isVideoFile(file);
+  if (tool === "video") {
+    if (!video) return t.videoInvalid;
+    return file.size > MAX_VIDEO_SIZE ? t.videoTooLarge : null;
+  }
+  if (!video && !isSupportedAudioFile(file)) return t.invalidFormat;
+  if (video && streaming) return file.size > MAX_VIDEO_SIZE ? t.videoTooLarge : null;
+  return file.size > MAX_FILE_SIZE ? t.tooLarge : null;
 }
 
 export function getFileFormatLabel(file) {
   if (!file) return "-";
-  const t = (file.type || "").toLowerCase();
-  if (t.includes("mpeg") || t.includes("mp3")) return "MP3";
-  if (t.includes("wav")) return "WAV";
-  if (t.includes("ogg")) return "OGG";
-  if (t.includes("aac") || t.includes("mp4") || t.includes("m4a")) return "AAC";
   const ext = getFileExtension(file);
+  if (isVideoFile(file)) return ext ? ext.toUpperCase() : "VIDEO";
+  const type = (file.type || "").toLowerCase();
+  if (type.includes("mpeg") || type.includes("mp3")) return "MP3";
+  if (type.includes("wav")) return "WAV";
+  if (type.includes("ogg")) return "OGG";
+  if (type.includes("aac") || type.includes("mp4") || type.includes("m4a")) return "AAC";
   return ext ? ext.toUpperCase() : t.unknownFormat;
 }
 
@@ -115,15 +132,26 @@ export function targetSampleRate(settings, bufferRate, formatInfo) {
 
 export function estimateOutputBytes(meta, settings) {
   const formatInfo = FORMAT_MAP[settings.format] ?? FORMAT_MAP.wav;
-  if (formatInfo.bitrate) return Math.round((meta.duration * formatInfo.bitrate * 1000) / 8);
   const rate = targetSampleRate(settings, meta.sampleRate, formatInfo);
+  if (formatInfo.bitrate) {
+    // A baja frecuencia, MP3 no llega a los bitrates altos: la norma los limita a 64 o 160 kbps.
+    const ceiling = formatInfo.type !== "mp3" || rate >= 32000 ? Infinity : rate >= 16000 ? 160 : 64;
+    return Math.round((meta.duration * Math.min(formatInfo.bitrate, ceiling) * 1000) / 8);
+  }
   return Math.round(meta.duration * rate * settings.channels * 2);
 }
 
-// shortcut: decodeAudioData remuestrea a la frecuencia del AudioContext, así que no conocemos la
-// frecuencia real del archivo; para conservarla habría que leer el encabezado de cada contenedor.
+// decodeAudioData remuestrea a la frecuencia del contexto: uno con la del archivo la conserva.
 export async function decodeFile(file) {
-  return getAudioContext().decodeAudioData(await file.arrayBuffer());
+  const bytes = await file.arrayBuffer();
+  try {
+    const { sourceSampleRate } = await import("./video.js");
+    const rate = await sourceSampleRate(file);
+    if (rate) return await new OfflineAudioContext(1, 1, rate).decodeAudioData(bytes.slice(0)); // decodeAudioData consume el buffer
+  } catch (err) {
+    console.warn("Se decodifica a la frecuencia del navegador:", err);
+  }
+  return getAudioContext().decodeAudioData(bytes);
 }
 
 // ==================== CODIFICADORES ====================
@@ -179,12 +207,34 @@ export function encodeWAV(audioBuffer) {
 
 const toInt16 = (sample) => Math.max(-1, Math.min(1, sample)) * 32767;
 
+/** Codificador MP3 por partes con lamejs. `gain` permite normalizar sin otra copia del audio. */
+export function mp3StreamEncoder(channels, sampleRate, bitrate) {
+  const encoder = new lamejs.Mp3Encoder(channels, sampleRate, bitrate);
+  const chunks = [];
+  const keep = (data) => {
+    if (data.length > 0) chunks.push(new Uint8Array(data));
+  };
+  return {
+    push(left, right, gain = 1) {
+      const leftChunk = new Int16Array(left.length);
+      const rightChunk = new Int16Array(left.length);
+      for (let i = 0; i < left.length; i++) {
+        leftChunk[i] = toInt16(left[i] * gain);
+        rightChunk[i] = toInt16(right[i] * gain);
+      }
+      keep(encoder.encodeBuffer(leftChunk, rightChunk));
+    },
+    finish() {
+      keep(encoder.flush());
+      return new Blob(chunks, { type: "audio/mp3" });
+    },
+  };
+}
+
 // MP3 con bitrate configurable vía lamejs local
 async function encodeMP3(audioBuffer, bitrate, onProgress, signal) {
   const channels = audioBuffer.numberOfChannels;
-  const mp3encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, bitrate);
-
-  const mp3Data = [];
+  const encoder = mp3StreamEncoder(channels, audioBuffer.sampleRate, bitrate);
   const blockSize = 1152;
   const left = audioBuffer.getChannelData(0);
   const right = channels > 1 ? audioBuffer.getChannelData(1) : left;
@@ -192,17 +242,8 @@ async function encodeMP3(audioBuffer, bitrate, onProgress, signal) {
 
   for (let b = 0; b < totalBlocks; b++) {
     const start = b * blockSize;
-    const size = Math.min(blockSize, left.length - start);
-    const leftChunk = new Int16Array(size);
-    const rightChunk = new Int16Array(size);
-
-    for (let j = 0; j < size; j++) {
-      leftChunk[j] = toInt16(left[start + j]);
-      rightChunk[j] = toInt16(right[start + j]);
-    }
-
-    const mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
-    if (mp3buf.length > 0) mp3Data.push(new Uint8Array(mp3buf));
+    const end = start + blockSize;
+    encoder.push(left.subarray(start, end), right.subarray(start, end));
 
     if (b % 100 === 0) {
       onProgress(70 + Math.floor((b / totalBlocks) * 28), t.encoding("MP3"));
@@ -211,9 +252,16 @@ async function encodeMP3(audioBuffer, bitrate, onProgress, signal) {
     }
   }
 
-  const final = mp3encoder.flush();
-  if (final.length > 0) mp3Data.push(new Uint8Array(final));
-  return new Blob(mp3Data, { type: "audio/mp3" });
+  return encoder.finish();
+}
+
+/** Con WebCodecs, OGG se codifica con Mediabunny, sin grabar en tiempo real ni depender de MediaRecorder. */
+export async function canEncodeOpus() {
+  try {
+    return (await AudioEncoder.isConfigSupported({ codec: "opus", sampleRate: 48000, numberOfChannels: 2, bitrate: 128000 })).supported;
+  } catch {
+    return false;
+  }
 }
 
 function getSupportedMediaMime(formatInfo) {
@@ -312,11 +360,11 @@ function normalizeBuffer(audioBuffer) {
   return normalized;
 }
 
-// Resampleo real usando OfflineAudioContext
-async function resampleAudioBuffer(audioBuffer, rate) {
+// Resampleo real usando OfflineAudioContext. Con menos canales, mezcla según la norma de Web Audio.
+async function resampleAudioBuffer(audioBuffer, rate, channels = audioBuffer.numberOfChannels) {
   const newLength = Math.ceil(audioBuffer.duration * rate);
   const OfflineCtor = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-  const offlineCtx = new OfflineCtor(audioBuffer.numberOfChannels, newLength, rate);
+  const offlineCtx = new OfflineCtor(channels, newLength, rate);
   const source = offlineCtx.createBufferSource();
   source.buffer = audioBuffer;
   source.connect(offlineCtx.destination);
@@ -340,7 +388,6 @@ function convertChannels(audioBuffer, targetChannels) {
       for (let i = 0; i < data.length; i++) monoData[i] += data[i] / numSrc;
     }
   } else {
-    // shortcut: un origen multicanal (5.1) a estéreo usa solo el primer canal; hacer un downmix real si hay pedidos.
     const srcData = audioBuffer.getChannelData(0);
     for (let ch = 0; ch < targetChannels; ch++) result.getChannelData(ch).set(srcData);
   }
@@ -379,7 +426,8 @@ export async function convertFile(file, settings, { onProgress = () => {}, onWar
 
   if (buffer.numberOfChannels !== settings.channels) {
     onProgress(60, t.adjustingChannels);
-    buffer = convertChannels(buffer, settings.channels);
+    // 5.1 y similares: tomar un solo canal perdería la voz, que va en el central.
+    buffer = buffer.numberOfChannels > 2 ? await resampleAudioBuffer(buffer, buffer.sampleRate, settings.channels) : convertChannels(buffer, settings.channels);
   }
 
   onProgress(70, t.encoding(formatLabel(formatInfo)));
@@ -398,7 +446,7 @@ export async function convertFile(file, settings, { onProgress = () => {}, onWar
     blob,
     ext: formatInfo.ext,
     format: formatLabel(formatInfo),
-    sampleRate: buffer.sampleRate,
+    sampleRate: formatInfo.realtime ? getAudioContext().sampleRate : buffer.sampleRate,
     channels: buffer.numberOfChannels,
   };
 }

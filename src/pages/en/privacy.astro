@@ -4,46 +4,53 @@ import Base from '../../layouts/Base.astro';
 
 <Base
   title="AudioLocal | Privacy"
-  description="AudioLocal's privacy policy. Your audio is converted directly in your browser, with no data sent to any server."
+  description="AudioLocal's privacy policy. Your audio, video and PDF files are converted in your browser and are not uploaded to any server."
   path="/en/privacy.html"
   alternate="/privacy.html"
   lang="en"
   active="privacy"
   ogTitle="AudioLocal — Privacy"
-  ogDescription="How AudioLocal handles your audio and your personal data."
-  ogImageAlt="Privacy at AudioLocal, local audio conversion"
+  ogDescription="How AudioLocal handles your files and your personal data."
+  ogImageAlt="Privacy at AudioLocal, local conversion in your browser"
 >
   <article class="doc prose">
-    <h1 class="title">Your audio, your privacy</h1>
-    <p class="lead">With AudioLocal, everything happens in your browser. No audio leaves your device.</p>
-    <p class="updated-note">No uploads to servers · No sign-up or account · No tracking cookies · Open and inspectable code</p>
+    <h1 class="title">Your files, your privacy</h1>
+    <p class="lead">Today, every AudioLocal tool runs in your browser. No file leaves your device.</p>
+    <p class="updated-note">No file uploads · No sign-up or account · No tracking cookies · <a href="https://github.com/Andrespb404/AudioLocal" target="_blank" rel="noopener">Public code on GitHub</a></p>
 
     <section class="doc-section">
       <h2>100% local processing</h2>
-      <p>AudioLocal converts your audio files (MP3, WAV, OGG, AAC, etc.) directly in your browser using the Web Audio API and JavaScript. Your files never leave your device, are not uploaded to any server, and are cleared automatically when you close the tab or reload the page.</p>
+      <p>AudioLocal converts your audio, video and PDF files directly in your browser, using JavaScript and the browser's media features. Your files never leave your device, are not uploaded to any server, and are cleared automatically from the page when you close the tab or reload it. Whatever you download stays on your device.</p>
     </section>
 
     <section class="doc-section">
       <h2>Information we do NOT collect</h2>
       <ul>
-        <li>Uploaded or converted audio files</li>
-        <li>IP address or geolocation data</li>
-        <li>Name, email or any other personal data</li>
+        <li>Your files or their contents</li>
+        <li>Sign-up data: there are no accounts</li>
         <li>Conversion history</li>
+        <li>Analytics or tracking of your activity</li>
       </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2>Technical hosting data</h2>
+      <p>The site is hosted on <strong>Vercel</strong>, which logs technical data for each visit (such as the IP address, the date and the page requested) to serve and protect the site. Your files don't travel in those requests. See its <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">privacy policy</a>.</p>
+      <p>With some PDFs, the browser asks the site for helper files, such as fonts or character maps. That request never includes your document or its name.</p>
     </section>
 
     <section class="doc-section">
       <h2>Cookies and local storage</h2>
       <p>We use <strong>localStorage</strong> only to save your conversion preferences (output format, channels, sample rate, etc.). These preferences stay in your browser, and you can delete them at any time.</p>
-      <p>To work offline, a <strong>service worker</strong> saves the site's files (pages, styles, scripts and fonts) in your browser's cache. It never saves your audio, and you can clear it from your browser settings.</p>
+      <p>To work offline, a <strong>service worker</strong> saves the site's files (pages, styles, scripts and fonts) in your browser's cache. It never saves your files, and you can clear it from your browser settings.</p>
       <p>We don't use tracking cookies or third-party advertising.</p>
     </section>
 
     <section class="doc-section">
       <h2>Donations (Ko-fi)</h2>
-      <p>This site accepts voluntary donations through <strong>Ko-fi</strong>. Clicking the donation link takes you to ko-fi.com, which has its own privacy policy. AudioLocal does not receive or store any payment data.</p>
+      <p>This site accepts voluntary donations through <strong>Ko-fi</strong>. Clicking the donation link takes you to ko-fi.com, which has its own privacy policy. If you donate, we receive your display name and email; the payment is handled by Ko-fi and its processor, and we don't see your card details.</p>
       <p>You can read Ko-fi's policy at: <a href="https://ko-fi.com/privacy" target="_blank" rel="noopener">ko-fi.com/privacy</a></p>
+      <p>If you email us, we receive your address and whatever you send.</p>
     </section>
 
     <section class="doc-section">
@@ -61,6 +68,6 @@ import Base from '../../layouts/Base.astro';
       <p>We may update this Privacy Policy from time to time. The current version will always be the one published on this page. The date of the last update appears at the end.</p>
     </section>
 
-    <p class="updated-note">Last updated: November 4, 2026</p>
+    <p class="updated-note">Last updated: November 6, 2026</p>
   </article>
 </Base>

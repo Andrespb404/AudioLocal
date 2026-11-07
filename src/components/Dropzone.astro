@@ -1,20 +1,32 @@
 ---
 import { ui } from '../i18n/ui.js';
 
-const { lang = 'es' } = Astro.props;
+const { lang = 'es', tool = 'audio' } = Astro.props;
 const text = ui[lang];
+const accepts = {
+  audio: 'audio/*,video/*,.mp3,.wav,.ogg,.aac,.m4a,.flac,.mp4,.m4v,.mov,.mkv,.webm,.ts',
+  video: 'video/*,.mp4,.m4v,.mov,.mkv,.webm,.ts',
+  pdf: '.pdf,application/pdf',
+};
 ---
 
 <section class="dropzone enter enter-1" id="dropzone" aria-label={text.dropzone.label}>
-  <p class="dropzone-title" id="dropzoneTitle">{text.dropzone.title}</p>
+  <p class="dropzone-title" id="dropzoneTitle">{text.tools[tool].dropTitle}</p>
   <button type="button" class="btn btn-primary dropzone-btn" id="btnBrowse">{text.dropzone.browse}</button>
-  <p class="dropzone-meta">{text.dropzone.meta}</p>
+  <p class="dropzone-meta">{text.tools[tool].dropMeta}</p>
 </section>
 <p class="trust enter enter-2" id="trustLine">{text.dropzone.trust}</p>
 <!-- Fuera de la tarjeta: su clic burbujearía hasta el manejador que lo abre. -->
-<input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.ogg,.aac,.m4a,.webm,.flac" multiple hidden aria-label={text.dropzone.input} />
+<input type="file" id="fileInput" accept={accepts[tool]} multiple hidden aria-label={text.dropzone.input} />
 
 <style>
+  /* En una pantalla táctil no se arrastra: basta con el botón. */
+  @media (pointer: coarse) {
+    .dropzone-title {
+      display: none;
+    }
+  }
+
   .dropzone {
     display: flex;
     flex-direction: column;

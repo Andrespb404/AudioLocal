@@ -74,12 +74,18 @@ export function conversionLabel(counts) {
   return t.convertingOf(Math.min(total, counts[STATUS.DONE] + 1), total);
 }
 
+/** Cuántos fallaron y por qué, sin repetir motivos: un lector de pantalla no ve las filas. */
+export function errorSummary(items) {
+  const errors = items.filter((item) => item.status === STATUS.ERROR).map((item) => item.error);
+  return errors.length ? `${t.errorCount(errors.length)}: ${[...new Set(errors)].join(" ")}` : "";
+}
+
 export const hasUnsavedResults = (items) =>
   items.some((item) => item.status === STATUS.DONE && !item.downloaded);
 
 export function outputName(fileName, ext) {
   const base = fileName.replace(/\.[^/.]+$/, "").replace(/[/\\]/g, "_");
-  return `${base} (Converted).${ext}`;
+  return `${base} (${t.convertedSuffix}).${ext}`;
 }
 
 /** Evita nombres repetidos dentro del ZIP; sin distinguir mayúsculas porque Windows no lo hace. */

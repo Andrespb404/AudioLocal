@@ -19,11 +19,11 @@ const path = conversionPath(conversion, lang);
   path={path}
   alternate={conversionPath(conversion, text.otherLanguageCode)}
   lang={lang}
-  active="convert"
+  active={conversion.tool}
   ogImageAlt={page.name}
   jsonLd={appJsonLd(lang, new URL(path, Astro.site).href, page.description)}
 >
-  <ConverterTool lang={lang} title={page.h1} preset={conversion.format} />
+  <ConverterTool lang={lang} tool={conversion.tool} title={page.h1} preset={conversion.format} presetQuality={conversion.quality} />
   <Coffee lang={lang} />
 
   <section class="card prose reveal info">
@@ -36,7 +36,7 @@ const path = conversionPath(conversion, lang);
     <p>{page.expect}</p>
   </section>
 
-  <ConversionLinks lang={lang} current={conversion.id} />
+  <ConversionLinks lang={lang} tool={conversion.tool} current={conversion.id} />
   <Faq lang={lang} items={page.faq} />
 </Base>
 

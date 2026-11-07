@@ -2,13 +2,14 @@
 export const conversions = [
   {
     id: 'mp3-wav',
+    tool: 'audio',
     format: 'wav',
     slugs: { es: 'mp3-a-wav', en: 'mp3-to-wav' },
     es: {
       name: 'MP3 a WAV',
-      title: 'Convertir MP3 a WAV gratis y sin subir archivos | AudioLocal',
-      description: 'Convierte MP3 a WAV en tu navegador, gratis y por lotes. Tus archivos no se suben a ningún servidor y funciona sin conexión.',
-      h1: 'Convertir MP3 a WAV gratis, sin subir archivos',
+      title: 'Convertir MP3 a WAV gratis y sin registro | AudioLocal',
+      description: 'Convierte MP3 a WAV en tu navegador, gratis y por lotes. Tus archivos no se suben y funciona sin conexión una vez abierta.',
+      h1: 'Convertir MP3 a WAV gratis, sin registro',
       intro: 'Pasa tus MP3 a WAV sin instalar nada. La conversión ocurre en tu navegador, así que el audio nunca sale de tu equipo.',
       when: [
         'Tu editor de audio o video funciona mejor con WAV.',
@@ -23,9 +24,9 @@ export const conversions = [
     },
     en: {
       name: 'MP3 to WAV',
-      title: 'Convert MP3 to WAV for free, with no uploads | AudioLocal',
-      description: 'Convert MP3 to WAV in your browser, free and in batches. Your files are never uploaded, and it works offline.',
-      h1: 'Convert MP3 to WAV for free, with no uploads',
+      title: 'Convert MP3 to WAV for free, with no sign-up | AudioLocal',
+      description: 'Convert MP3 to WAV in your browser, free and in batches. Your files are never uploaded, and it works offline once opened.',
+      h1: 'Convert MP3 to WAV for free, with no sign-up',
       intro: 'Turn your MP3 files into WAV without installing anything. The conversion runs in your browser, so the audio never leaves your device.',
       when: [
         'Your audio or video editor works better with WAV.',
@@ -41,13 +42,14 @@ export const conversions = [
   },
   {
     id: 'wav-mp3',
+    tool: 'audio',
     format: 'mp3',
     slugs: { es: 'wav-a-mp3', en: 'wav-to-mp3' },
     es: {
       name: 'WAV a MP3',
-      title: 'Convertir WAV a MP3 gratis y sin subir archivos | AudioLocal',
+      title: 'Convertir WAV a MP3 gratis y sin registro | AudioLocal',
       description: 'Convierte WAV a MP3 a 128, 256 o 320 kbps en tu navegador. Gratis, por lotes y sin subir tus archivos a ningún servidor.',
-      h1: 'Convertir WAV a MP3 gratis, sin subir archivos',
+      h1: 'Convertir WAV a MP3 gratis, sin registro',
       intro: 'Reduce el tamaño de tus grabaciones sin instalar nada. Elige la calidad y convierte varios archivos a la vez, directamente en tu navegador.',
       when: [
         'Tus WAV ocupan demasiado para enviarlos o guardarlos.',
@@ -62,9 +64,9 @@ export const conversions = [
     },
     en: {
       name: 'WAV to MP3',
-      title: 'Convert WAV to MP3 for free, with no uploads | AudioLocal',
+      title: 'Convert WAV to MP3 for free, with no sign-up | AudioLocal',
       description: 'Convert WAV to MP3 at 128, 256 or 320 kbps in your browser. Free, in batches, and your files are never uploaded.',
-      h1: 'Convert WAV to MP3 for free, with no uploads',
+      h1: 'Convert WAV to MP3 for free, with no sign-up',
       intro: 'Shrink your recordings without installing anything. Pick a quality and convert several files at once, right in your browser.',
       when: [
         'Your WAV files are too big to send or store.',
@@ -80,13 +82,14 @@ export const conversions = [
   },
   {
     id: 'm4a-mp3',
+    tool: 'audio',
     format: 'mp3',
     slugs: { es: 'm4a-a-mp3', en: 'm4a-to-mp3' },
     es: {
       name: 'M4A a MP3',
-      title: 'Convertir M4A a MP3 gratis y sin subir archivos | AudioLocal',
+      title: 'Convertir M4A a MP3 gratis y sin registro | AudioLocal',
       description: 'Convierte M4A a MP3 en tu navegador, ideal para notas de voz y audios del celular. Gratis, por lotes y sin subir archivos.',
-      h1: 'Convertir M4A a MP3 gratis, sin subir archivos',
+      h1: 'Convertir M4A a MP3 gratis, sin registro',
       intro: 'Muchas grabadoras de celular guardan en M4A. Pásalos a MP3 sin enviar tus grabaciones a ningún servidor, algo importante cuando son conversaciones privadas.',
       when: [
         'Un programa, página o reproductor antiguo no acepta M4A.',
@@ -101,9 +104,9 @@ export const conversions = [
     },
     en: {
       name: 'M4A to MP3',
-      title: 'Convert M4A to MP3 for free, with no uploads | AudioLocal',
+      title: 'Convert M4A to MP3 for free, with no sign-up | AudioLocal',
       description: 'Convert M4A to MP3 in your browser, ideal for voice memos and phone recordings. Free, in batches, and with no uploads.',
-      h1: 'Convert M4A to MP3 for free, with no uploads',
+      h1: 'Convert M4A to MP3 for free, with no sign-up',
       intro: 'Many phone recorders save as M4A. Turn those files into MP3 without sending your recordings to a server, which matters when they are private conversations.',
       when: [
         'An older program, website or player won\'t accept M4A.',
@@ -119,13 +122,14 @@ export const conversions = [
   },
   {
     id: 'flac-mp3',
+    tool: 'audio',
     format: 'mp3',
     slugs: { es: 'flac-a-mp3', en: 'flac-to-mp3' },
     es: {
       name: 'FLAC a MP3',
-      title: 'Convertir FLAC a MP3 gratis y sin subir archivos | AudioLocal',
+      title: 'Convertir FLAC a MP3 gratis y sin registro | AudioLocal',
       description: 'Convierte FLAC a MP3 de hasta 320 kbps en tu navegador. Gratis, por lotes y sin subir tu música a ningún servidor.',
-      h1: 'Convertir FLAC a MP3 gratis, sin subir archivos',
+      h1: 'Convertir FLAC a MP3 gratis, sin registro',
       intro: 'Lleva tu música en FLAC a un formato más liviano y compatible, sin instalar programas y sin subirla a ningún sitio.',
       when: [
         'Tu teléfono o reproductor se queda sin espacio.',
@@ -140,9 +144,9 @@ export const conversions = [
     },
     en: {
       name: 'FLAC to MP3',
-      title: 'Convert FLAC to MP3 for free, with no uploads | AudioLocal',
+      title: 'Convert FLAC to MP3 for free, with no sign-up | AudioLocal',
       description: 'Convert FLAC to MP3 at up to 320 kbps in your browser. Free, in batches, and your music is never uploaded.',
-      h1: 'Convert FLAC to MP3 for free, with no uploads',
+      h1: 'Convert FLAC to MP3 for free, with no sign-up',
       intro: 'Move your FLAC music to a lighter, more compatible format, with nothing to install and nothing to upload.',
       when: [
         'Your phone or player is running out of space.',
@@ -158,13 +162,14 @@ export const conversions = [
   },
   {
     id: 'ogg-mp3',
+    tool: 'audio',
     format: 'mp3',
     slugs: { es: 'ogg-a-mp3', en: 'ogg-to-mp3' },
     es: {
       name: 'OGG a MP3',
-      title: 'Convertir OGG a MP3 gratis y sin subir archivos | AudioLocal',
+      title: 'Convertir OGG a MP3 gratis y sin registro | AudioLocal',
       description: 'Convierte OGG a MP3 en tu navegador, incluidos muchos audios de apps de mensajería. Gratis, por lotes y sin subir archivos.',
-      h1: 'Convertir OGG a MP3 gratis, sin subir archivos',
+      h1: 'Convertir OGG a MP3 gratis, sin registro',
       intro: 'OGG es habitual en notas de voz de apps de mensajería y en algunos juegos, pero no todos los programas lo abren. Conviértelo a MP3 sin que el audio salga de tu equipo.',
       when: [
         'Descargaste una nota de voz en OGG y no se abre en tu reproductor.',
@@ -179,9 +184,9 @@ export const conversions = [
     },
     en: {
       name: 'OGG to MP3',
-      title: 'Convert OGG to MP3 for free, with no uploads | AudioLocal',
+      title: 'Convert OGG to MP3 for free, with no sign-up | AudioLocal',
       description: 'Convert OGG to MP3 in your browser, including many voice messages from chat apps. Free, in batches, and with no uploads.',
-      h1: 'Convert OGG to MP3 for free, with no uploads',
+      h1: 'Convert OGG to MP3 for free, with no sign-up',
       intro: 'OGG is common in voice messages from chat apps and in some games, but not every program opens it. Convert it to MP3 without the audio leaving your device.',
       when: [
         'You saved a voice message as OGG and your player won\'t open it.',
@@ -197,13 +202,14 @@ export const conversions = [
   },
   {
     id: 'aac-mp3',
+    tool: 'audio',
     format: 'mp3',
     slugs: { es: 'aac-a-mp3', en: 'aac-to-mp3' },
     es: {
       name: 'AAC a MP3',
-      title: 'Convertir AAC a MP3 gratis y sin subir archivos | AudioLocal',
+      title: 'Convertir AAC a MP3 gratis y sin registro | AudioLocal',
       description: 'Convierte AAC a MP3 en tu navegador para reproducirlo en más dispositivos. Gratis, por lotes y sin subir archivos.',
-      h1: 'Convertir AAC a MP3 gratis, sin subir archivos',
+      h1: 'Convertir AAC a MP3 gratis, sin registro',
       intro: 'AAC comprime muy bien, pero algunos equipos más antiguos no lo reconocen. Pásalo a MP3 sin instalar nada y sin subir tus archivos.',
       when: [
         'Un reproductor, radio de auto o programa antiguo no reconoce AAC.',
@@ -218,9 +224,9 @@ export const conversions = [
     },
     en: {
       name: 'AAC to MP3',
-      title: 'Convert AAC to MP3 for free, with no uploads | AudioLocal',
+      title: 'Convert AAC to MP3 for free, with no sign-up | AudioLocal',
       description: 'Convert AAC to MP3 in your browser so it plays on more devices. Free, in batches, and with no uploads.',
-      h1: 'Convert AAC to MP3 for free, with no uploads',
+      h1: 'Convert AAC to MP3 for free, with no sign-up',
       intro: 'AAC compresses very well, but some older devices don\'t recognize it. Turn it into MP3 with nothing to install and nothing to upload.',
       when: [
         'An older player, car stereo or program doesn\'t recognize AAC.',
@@ -234,11 +240,334 @@ export const conversions = [
       ],
     },
   },
+  {
+    id: 'mp4-mp3',
+    tool: 'audio',
+    format: 'mp3',
+    slugs: { es: 'mp4-a-mp3', en: 'mp4-to-mp3' },
+    es: {
+      name: 'MP4 a MP3',
+      title: 'Convertir MP4 a MP3 gratis y sin registro | AudioLocal',
+      description: 'Saca el audio de un video MP4 y guárdalo como MP3, gratis y por lotes. Funciona en tu navegador, sin instalar nada y sin anuncios.',
+      h1: 'Convertir MP4 a MP3 gratis, sin registro',
+      intro: 'Guarda solo el sonido de un video: una clase, una entrevista o una grabación propia. Elige la calidad y convierte varios archivos a la vez.',
+      when: [
+        'Quieres escuchar una clase o una charla sin mantener la pantalla encendida.',
+        'Necesitas el audio de tu video para editarlo o publicarlo como pódcast.',
+        'El video ocupa demasiado y solo te interesa el sonido.',
+      ],
+      expect: 'El MP3 pesa mucho menos que el video porque deja fuera la imagen. La conversión tarda según la duración y tu equipo, y hasta 2 GB por video. Convierte solo contenido tuyo o que tengas derecho a usar.',
+      faq: [
+        { question: '¿Qué calidad conviene para voz y para música?', answer: 'Para voz suele alcanzar con 128 kbps. Para música, usa 256 o 320 kbps. Elegir más calidad que la del audio original solo aumenta el tamaño.' },
+        { question: '¿Funciona con otros formatos de video?', answer: 'Sí, también con MOV, M4V, MKV, WebM y TS. Los formatos AVI, WMV y FLV todavía no se admiten.' },
+      ],
+    },
+    en: {
+      name: 'MP4 to MP3',
+      title: 'Convert MP4 to MP3 for free, with no sign-up | AudioLocal',
+      description: 'Pull the audio out of an MP4 video and save it as MP3, free and in batches. It runs in your browser, with nothing to install and no ads.',
+      h1: 'Convert MP4 to MP3 for free, with no sign-up',
+      intro: 'Keep only the sound from a video: a lecture, an interview or your own recording. Pick a quality and convert several files at once.',
+      when: [
+        'You want to listen to a lecture or talk without keeping the screen on.',
+        'You need the audio from your video to edit it or publish it as a podcast.',
+        'The video takes up too much space and you only care about the sound.',
+      ],
+      expect: 'The MP3 is far smaller than the video because it leaves out the picture. Conversion time depends on the length and your device, with up to 2 GB per video. Only convert content you own or have the right to use.',
+      faq: [
+        { question: 'What quality is best for speech and for music?', answer: '128 kbps is usually enough for speech. For music, use 256 or 320 kbps. Choosing a higher quality than the original audio only makes the file bigger.' },
+        { question: 'Does it work with other video formats?', answer: 'Yes, also with MOV, M4V, MKV, WebM and TS. AVI, WMV and FLV are not supported yet.' },
+      ],
+    },
+  },
+  {
+    id: 'mov-mp4',
+    tool: 'video',
+    format: 'mp4',
+    slugs: { es: 'mov-a-mp4', en: 'mov-to-mp4' },
+    es: {
+      name: 'MOV a MP4',
+      title: 'Convertir MOV a MP4 gratis y sin registro | AudioLocal',
+      description: 'Convierte videos MOV de iPhone o cámara a MP4 en tu navegador. Gratis, por lotes, sin instalar nada y sin anuncios.',
+      h1: 'Convertir MOV a MP4 gratis, sin registro',
+      intro: 'Los videos de iPhone y de muchas cámaras se guardan en MOV, que no siempre se abre fuera de Apple. Pásalos a MP4 para compartirlos o editarlos sin problemas.',
+      when: [
+        'Un programa o una página no acepta tu archivo MOV.',
+        'Quieres enviar un video de iPhone a alguien con Windows o Android.',
+        'Necesitas un formato que funcione en casi cualquier reproductor.',
+      ],
+      expect: 'Si el video ya usa un códec compatible con MP4, la conversión es casi instantánea y no pierde calidad. Si hay que recodificarlo, tarda más y depende de tu equipo.',
+      faq: [
+        { question: '¿Se pierde calidad al pasar de MOV a MP4?', answer: 'Con la calidad "Igual" no hay pérdida cuando el códec es compatible, porque el video solo cambia de contenedor.' },
+        { question: '¿Funciona con videos HEVC de iPhone?', answer: 'Depende del navegador: suele funcionar mejor en Chrome o Edge en una computadora. "Igual" conserva HEVC, que algunos equipos no abren; si te pasa, elige calidad Alta para obtener un MP4 más compatible.' },
+      ],
+    },
+    en: {
+      name: 'MOV to MP4',
+      title: 'Convert MOV to MP4 for free, with no sign-up | AudioLocal',
+      description: 'Convert MOV videos from an iPhone or camera to MP4 in your browser. Free, in batches, with nothing to install and no ads.',
+      h1: 'Convert MOV to MP4 for free, with no sign-up',
+      intro: 'iPhones and many cameras save video as MOV, which doesn\'t always open outside Apple devices. Turn it into MP4 to share or edit it without trouble.',
+      when: [
+        'A program or website won\'t accept your MOV file.',
+        'You want to send an iPhone video to someone on Windows or Android.',
+        'You need a format that works in almost any player.',
+      ],
+      expect: 'If the video already uses a codec MP4 supports, conversion is nearly instant and loses no quality. If it needs re-encoding, it takes longer and depends on your device.',
+      faq: [
+        { question: 'Do I lose quality going from MOV to MP4?', answer: 'With "Same" quality there is no loss when the codec is compatible, because the video only changes container.' },
+        { question: 'Does it work with iPhone HEVC videos?', answer: 'It depends on the browser: Chrome or Edge on a computer usually work best. "Same" keeps HEVC, which some devices can\'t open; if that happens, choose High quality for a more compatible MP4.' },
+      ],
+    },
+  },
+  {
+    id: 'webm-mp4',
+    tool: 'video',
+    format: 'mp4',
+    slugs: { es: 'webm-a-mp4', en: 'webm-to-mp4' },
+    es: {
+      name: 'WebM a MP4',
+      title: 'Convertir WebM a MP4 gratis y sin registro | AudioLocal',
+      description: 'Convierte grabaciones WebM a MP4 en tu navegador para abrirlas en más programas y dispositivos. Gratis, por lotes y sin anuncios.',
+      h1: 'Convertir WebM a MP4 gratis, sin registro',
+      intro: 'Muchas grabaciones de pantalla y de videollamadas se guardan en WebM. Conviértelas a MP4 para abrirlas en casi cualquier editor, teléfono o reproductor.',
+      when: [
+        'Tu editor de video no reconoce el archivo WebM.',
+        'Grabaste la pantalla y necesitas compartir el video con más personas.',
+        'Una plataforma te pide subir el video en MP4.',
+      ],
+      expect: 'Pasar de WebM a MP4 suele requerir recodificar la imagen, así que tarda más que un simple cambio de contenedor. El tiempo depende de la duración y de tu equipo.',
+      faq: [
+        { question: '¿Por qué tarda más que otras conversiones?', answer: 'WebM suele usar códecs que MP4 no reproduce de forma tan universal, por lo que se recodifica a H.264 para que funcione en más dispositivos.' },
+        { question: '¿Puedo reducir el tamaño a la vez?', answer: 'Sí. Elige una resolución menor o una calidad media o baja antes de convertir.' },
+      ],
+    },
+    en: {
+      name: 'WebM to MP4',
+      title: 'Convert WebM to MP4 for free, with no sign-up | AudioLocal',
+      description: 'Convert WebM recordings to MP4 in your browser so they open in more programs and devices. Free, in batches, and with no ads.',
+      h1: 'Convert WebM to MP4 for free, with no sign-up',
+      intro: 'Many screen and video-call recordings are saved as WebM. Convert them to MP4 so they open in almost any editor, phone or player.',
+      when: [
+        'Your video editor doesn\'t recognize the WebM file.',
+        'You recorded your screen and need to share the video more widely.',
+        'A platform asks you to upload the video as MP4.',
+      ],
+      expect: 'Going from WebM to MP4 usually means re-encoding the picture, so it takes longer than a simple container change. The time depends on the length and your device.',
+      faq: [
+        { question: 'Why does it take longer than other conversions?', answer: 'WebM often uses codecs that aren\'t as widely playable in MP4, so the video is re-encoded to H.264 to work on more devices.' },
+        { question: 'Can I reduce the size at the same time?', answer: 'Yes. Choose a lower resolution or a medium or low quality before converting.' },
+      ],
+    },
+  },
+  {
+    id: 'compress-video',
+    tool: 'video',
+    format: 'mp4',
+    quality: 'medium',
+    slugs: { es: 'comprimir-video', en: 'compress-video' },
+    es: {
+      name: 'Comprimir video',
+      title: 'Comprimir video gratis y sin registro | AudioLocal',
+      description: 'Reduce el tamaño de tus videos eligiendo calidad y resolución. Gratis, por lotes, en tu navegador y sin anuncios ni marcas de agua.',
+      h1: 'Comprimir video gratis, sin registro',
+      intro: 'Haz que un video pese menos para enviarlo por correo, mensajería o subirlo a una plataforma. Elige la calidad y la resolución que necesitas.',
+      when: [
+        'El video supera el límite de una app de mensajería o del correo.',
+        'Tu teléfono o tu disco se están quedando sin espacio.',
+        'Vas a publicar el video y no necesitas la máxima resolución.',
+      ],
+      expect: 'Bajar a 720p con calidad media suele reducir bastante el tamaño, sobre todo en videos de 4K o 1080p. Comprimir descarta información, así que conserva el original si puedes.',
+      faq: [
+        { question: '¿Qué ajustes elijo para reducir más?', answer: 'Baja primero la resolución, por ejemplo a 720p o 480p, y usa calidad media o baja. Cada paso reduce el tamaño a costa de nitidez.' },
+        { question: '¿Agrega una marca de agua?', answer: 'No. El video resultante no lleva marcas de agua.' },
+      ],
+    },
+    en: {
+      name: 'Compress video',
+      title: 'Compress video for free, with no sign-up | AudioLocal',
+      description: 'Shrink your videos by choosing the quality and resolution. Free, in batches, in your browser, with no ads and no watermarks.',
+      h1: 'Compress video for free, with no sign-up',
+      intro: 'Make a video smaller so you can email it, send it in a chat or upload it to a platform. Choose the quality and resolution you need.',
+      when: [
+        'The video is over the limit of a messaging app or email.',
+        'Your phone or disk is running out of space.',
+        'You plan to publish the video and don\'t need the highest resolution.',
+      ],
+      expect: 'Going down to 720p at medium quality usually cuts the size considerably, especially for 4K or 1080p videos. Compression discards information, so keep the original if you can.',
+      faq: [
+        { question: 'Which settings reduce the size the most?', answer: 'Lower the resolution first, for example to 720p or 480p, and use medium or low quality. Each step reduces the size at the cost of sharpness.' },
+        { question: 'Does it add a watermark?', answer: 'No. The resulting video has no watermark.' },
+      ],
+    },
+  },
+  {
+    id: 'pdf-jpg',
+    tool: 'pdf',
+    format: 'to-images',
+    slugs: { es: 'pdf-a-jpg', en: 'pdf-to-jpg' },
+    es: {
+      name: 'PDF a JPG',
+      title: 'Convertir PDF a JPG gratis y sin registro | AudioLocal',
+      description: 'Convierte cada página de un PDF en una imagen JPG o PNG, con la resolución que elijas. Gratis, por lotes, en tu navegador y sin anuncios.',
+      h1: 'Convertir PDF a JPG gratis, sin registro',
+      intro: 'Saca cada página de un PDF como imagen para compartirla, insertarla en una presentación o publicarla. Si el PDF tiene varias páginas, las descargas en un ZIP.',
+      when: [
+        'Quieres publicar una página de un PDF en una red social.',
+        'Necesitas insertar una página en una presentación o un documento.',
+        'Una plataforma solo acepta imágenes, no PDF.',
+      ],
+      expect: '150 ppp suele alcanzar para pantalla, y 300 ppp conviene para imprimir, aunque genera archivos más pesados. JPG ocupa menos; PNG conserva mejor el texto y las líneas finas.',
+      faq: [
+        { question: '¿Cómo descargo todas las páginas?', answer: 'Si el PDF tiene varias páginas, se descargan juntas en un ZIP, con un archivo numerado por página.' },
+        { question: '¿Funciona con PDF con contraseña?', answer: 'No. Si el PDF tiene contraseña verás un aviso. Si tienes derecho a hacerlo, quítala primero con el programa en el que puedas abrirlo.' },
+      ],
+    },
+    en: {
+      name: 'PDF to JPG',
+      title: 'Convert PDF to JPG for free, with no sign-up | AudioLocal',
+      description: 'Turn every page of a PDF into a JPG or PNG image, at the resolution you choose. Free, in batches, in your browser, and with no ads.',
+      h1: 'Convert PDF to JPG for free, with no sign-up',
+      intro: 'Save each page of a PDF as an image to share it, add it to a presentation or post it online. If the PDF has several pages, you download them in a ZIP.',
+      when: [
+        'You want to post a page from a PDF on social media.',
+        'You need to place a page in a presentation or document.',
+        'A platform only accepts images, not PDFs.',
+      ],
+      expect: '150 DPI is usually enough for screens, and 300 DPI is better for printing, though files get heavier. JPG is smaller; PNG keeps text and thin lines sharper.',
+      faq: [
+        { question: 'How do I download all the pages?', answer: 'If the PDF has several pages, they download together in a ZIP, with one numbered file per page.' },
+        { question: 'Does it work with password-protected PDFs?', answer: 'No. If the PDF has a password, you will see a notice. If you have the right to do so, remove it first in a program that can open it.' },
+      ],
+    },
+  },
+  {
+    id: 'jpg-pdf',
+    tool: 'pdf',
+    format: 'from-images',
+    slugs: { es: 'jpg-a-pdf', en: 'jpg-to-pdf' },
+    es: {
+      name: 'JPG a PDF',
+      title: 'Convertir JPG a PDF gratis y sin registro | AudioLocal',
+      description: 'Junta tus imágenes JPG o PNG en un solo PDF, en el orden que quieras. Gratis, en tu navegador, sin anuncios ni marcas de agua.',
+      h1: 'Convertir JPG a PDF gratis, sin registro',
+      intro: 'Reúne fotos, capturas o documentos escaneados en un solo PDF. Ordénalos como quieras y descarga un archivo listo para enviar.',
+      when: [
+        'Fotografiaste un documento y tienes que enviarlo como PDF.',
+        'Un trámite pide un solo archivo con varias páginas.',
+        'Quieres juntar capturas de pantalla en un documento.',
+      ],
+      expect: 'Cada imagen ocupa una página A4 según su orientación, sin agrandarse ni deformarse. El tamaño del PDF depende de tus imágenes, porque se incluyen sin recomprimir.',
+      faq: [
+        { question: '¿Puedo cambiar el orden de las imágenes?', answer: 'Sí. Usa el botón "Subir" en la lista antes de crear el PDF.' },
+        { question: '¿Qué formatos de imagen admite?', answer: 'JPG y PNG.' },
+      ],
+    },
+    en: {
+      name: 'JPG to PDF',
+      title: 'Convert JPG to PDF for free, with no sign-up | AudioLocal',
+      description: 'Combine your JPG or PNG images into a single PDF, in the order you want. Free, in your browser, with no ads and no watermarks.',
+      h1: 'Convert JPG to PDF for free, with no sign-up',
+      intro: 'Bring photos, screenshots or scanned documents together in one PDF. Put them in the order you want and download a file ready to send.',
+      when: [
+        'You photographed a document and need to send it as a PDF.',
+        'A form asks for a single file with several pages.',
+        'You want to combine screenshots into one document.',
+      ],
+      expect: 'Each image takes one A4 page based on its orientation, without being enlarged or distorted. The PDF size depends on your images, since they are included without recompressing.',
+      faq: [
+        { question: 'Can I change the order of the images?', answer: 'Yes. Use the "Move up" button in the list before creating the PDF.' },
+        { question: 'Which image formats are supported?', answer: 'JPG and PNG.' },
+      ],
+    },
+  },
+  {
+    id: 'merge-pdf',
+    tool: 'pdf',
+    format: 'merge',
+    slugs: { es: 'unir-pdf', en: 'merge-pdf' },
+    es: {
+      name: 'Unir PDF',
+      title: 'Unir PDF gratis y sin registro | AudioLocal',
+      description: 'Une varios PDF en un solo archivo y elige el orden. Gratis, en tu navegador, sin anuncios, sin marcas de agua y sin límite de uso.',
+      h1: 'Unir PDF gratis, sin registro',
+      intro: 'Combina contratos, facturas o capítulos en un solo documento. Agrega los archivos, ponlos en el orden correcto y descarga el PDF final.',
+      when: [
+        'Tienes que enviar varios documentos en un solo archivo.',
+        'Quieres juntar facturas o comprobantes de un mismo trámite.',
+        'Escaneaste un documento en partes y necesitas reunirlo.',
+      ],
+      expect: 'Las páginas se copian tal como están, sin perder calidad. Los PDF con contraseña no se pueden unir: verás cuál es para quitarlo o desbloquearlo primero.',
+      faq: [
+        { question: '¿Puedo elegir el orden?', answer: 'Sí. Usa el botón "Subir" en la lista antes de unir.' },
+        { question: '¿Se pierde calidad al unir?', answer: 'No. Las páginas se copian sin volver a procesar su contenido.' },
+      ],
+    },
+    en: {
+      name: 'Merge PDF',
+      title: 'Merge PDF for free, with no sign-up | AudioLocal',
+      description: 'Merge several PDFs into one file and choose the order. Free, in your browser, with no ads, no watermarks and no usage limits.',
+      h1: 'Merge PDF for free, with no sign-up',
+      intro: 'Combine contracts, invoices or chapters into one document. Add the files, put them in the right order and download the final PDF.',
+      when: [
+        'You have to send several documents in a single file.',
+        'You want to group invoices or receipts for the same case.',
+        'You scanned a document in parts and need to put it back together.',
+      ],
+      expect: 'Pages are copied as they are, with no quality loss. Password-protected PDFs can\'t be merged: you will see which one it is so you can remove or unlock it first.',
+      faq: [
+        { question: 'Can I choose the order?', answer: 'Yes. Use the "Move up" button in the list before merging.' },
+        { question: 'Do I lose quality when merging?', answer: 'No. Pages are copied without reprocessing their content.' },
+      ],
+    },
+  },
+  {
+    id: 'split-pdf',
+    tool: 'pdf',
+    format: 'split',
+    slugs: { es: 'dividir-pdf', en: 'split-pdf' },
+    es: {
+      name: 'Dividir PDF',
+      title: 'Dividir PDF gratis y sin registro | AudioLocal',
+      description: 'Separa un PDF por páginas o por rangos como 1-3, 5. Gratis, en tu navegador, sin anuncios y sin marcas de agua.',
+      h1: 'Dividir PDF gratis, sin registro',
+      intro: 'Saca solo las páginas que necesitas de un PDF, o sepáralo en un archivo por página. Escribe los rangos o deja el campo vacío para dividirlo entero.',
+      when: [
+        'Solo necesitas enviar algunas páginas de un documento largo.',
+        'Un PDF supera el tamaño que acepta un trámite o un correo.',
+        'Quieres separar un archivo escaneado en varios documentos.',
+      ],
+      expect: 'Cada rango genera un PDF: "1-3, 5" crea dos archivos. Con varios archivos, los descargas en un ZIP. Las páginas se copian sin perder calidad.',
+      faq: [
+        { question: '¿Cómo escribo los rangos?', answer: 'Sepáralos con comas: "1-3, 5, 8-10" crea tres archivos. Déjalo vacío para obtener un archivo por página.' },
+        { question: '¿Se modifica mi PDF original?', answer: 'No. Se crean archivos nuevos y el original no cambia.' },
+      ],
+    },
+    en: {
+      name: 'Split PDF',
+      title: 'Split PDF for free, with no sign-up | AudioLocal',
+      description: 'Split a PDF by page or by ranges such as 1-3, 5. Free, in your browser, with no ads and no watermarks.',
+      h1: 'Split PDF for free, with no sign-up',
+      intro: 'Pull out only the pages you need from a PDF, or separate it into one file per page. Type the ranges or leave the field empty to split the whole thing.',
+      when: [
+        'You only need to send a few pages of a long document.',
+        'A PDF is over the size a form or email accepts.',
+        'You want to separate a scanned file into several documents.',
+      ],
+      expect: 'Each range creates a PDF: "1-3, 5" makes two files. With several files, you download them in a ZIP. Pages are copied with no quality loss.',
+      faq: [
+        { question: 'How do I write the ranges?', answer: 'Separate them with commas: "1-3, 5, 8-10" creates three files. Leave it empty to get one file per page.' },
+        { question: 'Is my original PDF changed?', answer: 'No. New files are created and the original stays the same.' },
+      ],
+    },
+  },
 ];
 
 export function conversionPaths(lang) {
   return conversions.map((conversion) => ({ params: { slug: conversion.slugs[lang] }, props: { conversion, lang } }));
 }
+
+export const conversionsFor = (tool) => conversions.filter((conversion) => conversion.tool === tool);
 
 export const conversionPath = (conversion, lang) =>
   lang === 'en' ? `/en/${conversion.slugs.en}.html` : `/${conversion.slugs.es}.html`;

@@ -1,0 +1,17 @@
+---
+import { ui } from '../i18n/ui.js';
+
+const { lang = 'es' } = Astro.props;
+const text = ui[lang].options;
+---
+
+<div class="actions enter enter-2" id="actions" hidden>
+  <button type="button" class="btn btn-primary btn-wide" id="btnConvert" disabled>{text.convert}</button>
+  <button type="button" class="btn btn-wide" id="btnCancel" hidden>{text.cancel}</button>
+  <button type="button" class="btn" id="btnZip" hidden>
+    <span class="eq" id="zipEq" aria-hidden="true" hidden><i></i><i></i><i></i></span>
+    <span id="zipLabel">{text.downloadAll}</span>
+  </button>
+  <slot />
+  <button type="button" class="btn" id="btnClear">{text.restart}</button>
+</div>

@@ -1,26 +1,48 @@
 ---
+import Actions from './Actions.astro';
 import Dropzone from './Dropzone.astro';
 import Options from './Options.astro';
 import Player from './Player.astro';
 import Queue from './Queue.astro';
+import ScriptAudio from './ScriptAudio.astro';
+import ScriptPdf from './ScriptPdf.astro';
+import ScriptVideo from './ScriptVideo.astro';
+import VideoOptions from './VideoOptions.astro';
+import PdfModes from './PdfModes.astro';
+import PdfOptions from './PdfOptions.astro';
+import { ui } from '../i18n/ui.js';
 
-const { lang, title, preset } = Astro.props;
+const { lang, title, tool = 'audio', preset, presetQuality } = Astro.props;
 ---
 
-<div class="converter">
+<div class="converter" data-tool={tool}>
   <h1 class="title enter">{title}</h1>
-  <Dropzone lang={lang} />
+  <p class="load-error" id="loadError" role="alert" hidden>{ui[lang].loadError}</p>
+  {tool === 'pdf' && <PdfModes lang={lang} preset={preset} />}
+  <Dropzone lang={lang} tool={tool} />
   <Queue lang={lang} />
-  <Options lang={lang} preset={preset} />
+  {tool === 'audio' && <Options lang={lang} preset={preset} />}
+  {tool === 'video' && <VideoOptions lang={lang} preset={preset} presetQuality={presetQuality} />}
+  {tool === 'pdf' && <PdfOptions lang={lang} />}
+  <Actions lang={lang}>
+    <button type="button" class="btn" id="btnAgain" hidden>{tool === 'pdf' ? ui[lang].pdfOptions.again : ui[lang].options.again}</button>
+  </Actions>
 </div>
 
-<Player lang={lang} />
+{tool !== 'pdf' && <Player lang={lang} tool={tool} />}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script is:inline defer src="/js/lame.min.js"></script>
-<script src="../scripts/app.js"></script>
+{tool === 'audio' && <ScriptAudio />}
+{tool === 'video' && <ScriptVideo />}
+{tool === 'pdf' && <ScriptPdf />}
+<script is:inline src="/js/load-check.js"></script>
 
 <style>
+  .load-error {
+    margin-top: 16px;
+    color: var(--warning);
+  }
+
   .converter {
     padding-top: 32px;
   }

@@ -1,16 +1,16 @@
 ---
-import { conversionPath, conversions } from '../data/conversions.js';
+import { conversionPath, conversionsFor } from '../data/conversions.js';
 import { ui } from '../i18n/ui.js';
 
-const { lang, current } = Astro.props;
+const { lang, tool = 'audio', current } = Astro.props;
 const text = ui[lang];
 ---
 
 <nav class="links card reveal" aria-labelledby="otherConversions">
-  <h2 class="section-title" id="otherConversions">{text.otherConversions}</h2>
+  <h2 class="section-title" id="otherConversions">{current ? text.otherConversions : text.popularConversions}</h2>
   <ul>
     {
-      conversions
+      conversionsFor(tool)
         .filter((conversion) => conversion.id !== current)
         .map((conversion) => (
           <li>
@@ -18,7 +18,7 @@ const text = ui[lang];
           </li>
         ))
     }
-    {current && <li><a href={text.home}>{text.allFormats}</a></li>}
+    {current && <li><a href={text.tools[tool].path}>{text.tools[tool].allLink}</a></li>}
   </ul>
 </nav>
 

@@ -1,0 +1,43 @@
+---
+import { ui } from '../i18n/ui.js';
+
+const { lang = 'es', preset = 'to-images' } = Astro.props;
+const text = ui[lang].pdfOptions;
+const modes = ['to-images', 'from-images', 'merge', 'split'];
+---
+
+<div class="seg seg-four pdf-modes enter enter-1" id="pdfModes" role="radiogroup" aria-label={text.modesLabel}>
+  <span class="seg-slider" aria-hidden="true"></span>
+  {
+    modes.map((mode) => (
+      <label>
+        <input class="sr-only" type="radio" name="pdfMode" value={mode} checked={mode === preset} />
+        <span class="choice-box">
+          <span class="choice-name">{text.modes[mode].name}</span>
+          <span class="choice-detail">{text.modes[mode].detail}</span>
+        </span>
+      </label>
+    ))
+  }
+</div>
+
+<style>
+  .pdf-modes {
+    margin-top: 32px;
+  }
+
+  .pdf-modes :global(.choice-name) {
+    font-size: 1rem;
+  }
+
+  /* La tarjeta blanca ya no necesita tanta separación con el selector encima. */
+  .pdf-modes + :global(.dropzone) {
+    margin-top: 16px;
+  }
+
+  @media (max-width: 559px) {
+    .pdf-modes {
+      margin-top: 24px;
+    }
+  }
+</style>

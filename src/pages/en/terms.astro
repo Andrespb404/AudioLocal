@@ -3,16 +3,17 @@ import Base from '../../layouts/Base.astro';
 
 const sections = [
   { title: '1. Acceptance of the Terms', text: 'By accessing and using AudioLocal, you accept these Terms and Conditions. If you do not agree, please do not use the service.' },
-  { title: '2. Description of the Service', text: 'AudioLocal is a web tool for converting audio files directly in the user\'s browser. All processing is done locally.' },
+  { title: '2. Description of the Service', text: 'AudioLocal is a web tool for converting audio, video and PDF files directly in the user\'s browser. Today, all processing is done locally.' },
   {
     title: '3. Use of the Service',
     items: [
       'You may not use the service for illegal purposes or in ways that infringe the rights of others.',
       'You are solely responsible for the content of the files you process.',
-      'You may not attempt to extract, modify or reverse engineer the converter\'s source code.',
+      'Do not use the service to bypass technical content protections (DRM).',
+      'You may not attack or overload the site. Nothing in these terms limits the rights granted by the licenses of its components.',
     ],
   },
-  { title: '4. Intellectual Property', text: 'All content, design and code of AudioLocal belong to its developers. You are granted a limited, revocable and non-exclusive permission for personal use.' },
+  { title: '4. Intellectual Property', text: 'AudioLocal\'s own content, design and code belong to its developers. Third-party components keep their licenses, listed on the Licenses page. You are granted a limited, revocable and non-exclusive permission to use the site. Third-party trademarks mentioned belong to their owners, and AudioLocal is not affiliated with them. AudioLocal grants no patent licenses for file formats: certain commercial uses may require your own.' },
   {
     title: '5. Limitation of Liability',
     text: 'The service is provided "as is" without warranties of any kind. We are not responsible for:',
@@ -26,17 +27,17 @@ const sections = [
 
 <Base
   title="AudioLocal | Terms and Conditions"
-  description="Terms and Conditions for using AudioLocal, the local audio converter that runs in your browser."
+  description="Terms and Conditions for using AudioLocal, the tool for converting audio, video and PDF in your browser."
   path="/en/terms.html"
   alternate="/terms.html"
   lang="en"
   active="terms"
-  ogDescription="Terms of use for the local audio converter"
-  ogImageAlt="AudioLocal terms, a local audio conversion service"
+  ogDescription="Terms of use for AudioLocal"
+  ogImageAlt="AudioLocal terms"
 >
   <article class="doc prose">
     <h1 class="title">Terms and Conditions</h1>
-    <p class="lead">Last updated: May 20, 2026</p>
+    <p class="lead">Last updated: November 6, 2026</p>
 
     {
       sections.map((section) => (
@@ -50,7 +51,7 @@ const sections = [
 
     <section class="doc-section">
       <h2>Contact</h2>
-      <p>Any questions about these terms can be sent to: <a href="mailto:audiolocal.app@gmail.com">audiolocal.app@gmail.com</a></p>
+      <p>Any questions about these terms, including rights infringement notices, can be sent to: <a href="mailto:audiolocal.app@gmail.com">audiolocal.app@gmail.com</a></p>
     </section>
   </article>
 </Base>

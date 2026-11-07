@@ -16,7 +16,7 @@ const rates = [8000, 11025, 16000, 22050, 44100, 48000, 96000];
 <section class="options card enter enter-1" id="optionsSection" aria-labelledby="formatTitle" hidden>
   <h2 class="section-title" id="formatTitle" tabindex="-1">{text.convertTo}</h2>
 
-  <div class="seg formats" role="radiogroup" aria-labelledby="formatTitle" data-preset={preset}>
+  <div class="seg seg-four formats" role="radiogroup" aria-labelledby="formatTitle" data-preset={preset}>
     <span class="seg-slider" aria-hidden="true"></span>
     {
       formats.map((format) => (
@@ -31,15 +31,15 @@ const rates = [8000, 11025, 16000, 22050, 44100, 48000, 96000];
     }
   </div>
 
-  <div class="quality" id="qualityField">
+  <div class="row-field" id="qualityField">
     <span class="field-label" id="qualityLabel">{text.quality}</span>
-    <div class="seg seg-quiet quality-options" role="radiogroup" aria-labelledby="qualityLabel">
+    <div class="seg seg-quiet seg-options quality-options" role="radiogroup" aria-labelledby="qualityLabel">
       <span class="seg-slider" aria-hidden="true"></span>
       {
         qualities.map((quality) => (
           <label>
             <input class="sr-only" type="radio" name="quality" value={quality} checked={quality === 256} />
-            <span class="quality-box">{quality} kbps</span>
+            <span class="option-box">{quality} kbps</span>
           </label>
         ))
       }
@@ -47,6 +47,7 @@ const rates = [8000, 11025, 16000, 22050, 44100, 48000, 96000];
   </div>
 
   <p class="note" id="formatNote" hidden>{text.note}</p>
+  <p class="note">{text.dropped}</p>
 
   <details class="more">
     <summary>{text.more}</summary>
@@ -79,197 +80,8 @@ const rates = [8000, 11025, 16000, 22050, 44100, 48000, 96000];
   </details>
 </section>
 
-<div class="actions enter enter-2" id="actions" hidden>
-  <button type="button" class="btn btn-primary btn-wide" id="btnConvert" disabled>{text.convert}</button>
-  <button type="button" class="btn btn-wide" id="btnCancel" hidden>{text.cancel}</button>
-  <button type="button" class="btn" id="btnZip" hidden>
-    <span class="eq" id="zipEq" aria-hidden="true" hidden><i></i><i></i><i></i></span>
-    <span id="zipLabel">{text.downloadAll}</span>
-  </button>
-  <button type="button" class="btn" id="btnAgain" hidden>{text.again}</button>
-  <button type="button" class="btn" id="btnClear">{text.restart}</button>
-</div>
-
 <style>
-  .options {
-    margin-top: 16px;
-  }
-
-  .formats {
-    --cols: 4;
-    margin-top: 16px;
-  }
-
-  .choice-box {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    height: 100%;
-    padding: 12px 14px;
-  }
-
-  .choice-name {
-    color: var(--text);
-    font-size: 1.125rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-
-  .choice-detail {
-    font-size: 0.8125rem;
-    line-height: 1.3;
-  }
-
-  input:checked + .choice-box .choice-name,
-  input:checked + .choice-box .choice-detail {
-    color: #fff;
-  }
-
-  .quality {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 16px;
-    margin-top: 16px;
-  }
-
-  .field-label {
-    color: var(--muted);
-    font-size: 0.875rem;
-    font-weight: 500;
-  }
-
   .quality-options {
     --cols: 3;
-    flex: 1;
-  }
-
-  .quality-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40px;
-    padding: 0 8px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .note {
-    margin-top: 12px;
-    color: var(--muted);
-    font-size: 0.875rem;
-  }
-
-  .more {
-    margin-top: 16px;
-    border-top: 1px solid var(--line);
-  }
-
-  summary {
-    margin-bottom: -12px;
-    font-size: 0.9375rem;
-    font-weight: 500;
-    transition: color 0.15s;
-  }
-
-  summary:hover {
-    color: var(--text);
-  }
-
-  .more-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-    padding: 24px 0 4px;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  select {
-    width: 100%;
-    min-height: 44px;
-    padding: 0 10px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--surface-raised);
-    transition: border-color 0.15s;
-  }
-
-  select:hover:not(:disabled) {
-    border-color: var(--line-strong);
-  }
-
-  select:disabled {
-    opacity: 0.5;
-  }
-
-  select option {
-    background: var(--surface);
-    color: var(--text);
-  }
-
-  .check {
-    display: flex;
-    align-items: center;
-    align-self: end;
-    gap: 10px;
-    min-height: 44px;
-    font-size: 0.9375rem;
-  }
-
-  input[type='checkbox'] {
-    width: 20px;
-    height: 20px;
-    flex: none;
-    accent-color: var(--red);
-  }
-
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
-  }
-
-  @media (pointer: coarse) {
-    .quality-box {
-      min-height: 44px;
-    }
-  }
-
-  @media (max-width: 559px) {
-    .formats {
-      --cols: 2;
-      --rows: 2;
-    }
-
-    .formats:has(label:nth-of-type(2) input:checked) {
-      --col: 1;
-      --row: 0;
-    }
-
-    .formats:has(label:nth-of-type(3) input:checked) {
-      --col: 0;
-      --row: 1;
-    }
-
-    .formats:has(label:nth-of-type(4) input:checked) {
-      --col: 1;
-      --row: 1;
-    }
-
-    .quality {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .more-grid {
-      grid-template-columns: minmax(0, 1fr);
-    }
   }
 </style>
