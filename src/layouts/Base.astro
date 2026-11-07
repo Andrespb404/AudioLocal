@@ -1,5 +1,6 @@
 ---
 import '@fontsource-variable/instrument-sans';
+import Analytics from '@vercel/analytics/astro';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import { ui } from '../i18n/ui.js';
@@ -78,6 +79,7 @@ const ogImage = new URL(lang === 'en' ? '/assets/audiolocal_og_en.png' : '/asset
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <link rel="manifest" href={lang === 'en' ? '/manifest.en.webmanifest' : '/manifest.webmanifest'} />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    <Analytics />
   </head>
 
   <body>

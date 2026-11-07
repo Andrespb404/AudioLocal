@@ -21,5 +21,6 @@ export const components = [
   { name: 'fflate', pkg: 'fflate', license: 'MIT', links: ['https://github.com/101arrowz/fflate'], files: ['node_modules/fflate/LICENSE'] },
   { name: 'culori', pkg: 'culori', license: 'MIT', links: ['https://github.com/Evercoder/culori'], files: ['node_modules/culori/LICENSE'] },
   { name: 'tslib', pkg: 'tslib', license: '0BSD', links: ['https://github.com/microsoft/tslib'], files: ['node_modules/tslib/LICENSE.txt'] },
+  { name: 'Vercel Analytics', pkg: '@vercel/analytics', license: 'MIT', links: ['https://github.com/vercel/analytics'], files: ['node_modules/@vercel/analytics/LICENSE'] },
   { name: 'Instrument Sans', pkg: '@fontsource-variable/instrument-sans', license: 'OFL-1.1', links: ['https://github.com/Instrument/instrument-sans'], files: ['node_modules/@fontsource-variable/instrument-sans/LICENSE'] },
 ];
