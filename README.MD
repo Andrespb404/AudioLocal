@@ -15,7 +15,7 @@ Hoy todas las herramientas funcionan en el navegador.
 - fflate para los ZIP
 
 ## Desarrollo
-Requiere Node 24.
+Requiere Node 26.
 
     npm install
     npm run dev
