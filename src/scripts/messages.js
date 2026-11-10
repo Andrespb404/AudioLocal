@@ -3,6 +3,10 @@ const messages = {
   es: {
     locale: "es",
     convertedSuffix: "Convertido",
+    organizedSuffix: "organizado",
+    compressedSuffix: "comprimido",
+    compressingImage: (index, total) => `Imagen ${index} de ${total}`,
+    pdfAlreadyOptimized: "Ya estaba optimizado: se entrega sin cambios.",
     trimmed: (start, end) => `Recorte ${start}–${end}`,
     trimNeedsFormat: "En este navegador, el recorte solo funciona al convertir a MP3 o WAV.",
     reloadNeeded: "Esta página quedó desactualizada. Recárgala e inténtalo de nuevo.",
@@ -89,17 +93,23 @@ const messages = {
     needTwo: "Agrega otro PDF para unir",
     mergedName: "unido.pdf",
     imagesPdfName: "imagenes.pdf",
-    pdfActions: { "to-images": "Convertir a imágenes", "from-images": "Crear PDF", merge: "Unir PDF", split: "Dividir PDF" },
+    pdfActions: { "to-images": "Convertir a imágenes", "from-images": "Crear PDF", merge: "Unir PDF", split: "Dividir PDF", organize: "Organizar PDF", compress: "Comprimir PDF" },
     pdfDrop: {
       "to-images": { title: "Arrastra tus PDF aquí", meta: "Cada página se convierte en una imagen · hasta 200 MB por PDF" },
       "from-images": { title: "Arrastra tus imágenes aquí", meta: "JPG o PNG · una página por imagen, en el orden que elijas" },
       merge: { title: "Arrastra los PDF que quieres unir", meta: "Podrás ordenarlos antes de unirlos · hasta 200 MB por PDF" },
       split: { title: "Arrastra el PDF que quieres dividir", meta: "Una página por archivo o los rangos que elijas · hasta 200 MB" },
+      organize: { title: "Arrastra el PDF que quieres organizar", meta: "Reordena, quita o gira páginas · hasta 200 MB por PDF" },
+      compress: { title: "Arrastra los PDF que quieres comprimir", meta: "Reduce el peso de fotos y escaneos · hasta 200 MB por PDF" },
     },
   },
   en: {
     locale: "en",
     convertedSuffix: "Converted",
+    organizedSuffix: "organized",
+    compressedSuffix: "compressed",
+    compressingImage: (index, total) => `Image ${index} of ${total}`,
+    pdfAlreadyOptimized: "Already optimized: delivered unchanged.",
     trimmed: (start, end) => `Trim ${start}–${end}`,
     trimNeedsFormat: "In this browser, trimming only works when converting to MP3 or WAV.",
     reloadNeeded: "This page is out of date. Reload it and try again.",
@@ -186,15 +196,18 @@ const messages = {
     needTwo: "Add another PDF to merge",
     mergedName: "merged.pdf",
     imagesPdfName: "images.pdf",
-    pdfActions: { "to-images": "Convert to images", "from-images": "Create PDF", merge: "Merge PDFs", split: "Split PDF" },
+    pdfActions: { "to-images": "Convert to images", "from-images": "Create PDF", merge: "Merge PDFs", split: "Split PDF", organize: "Organize PDF", compress: "Compress PDF" },
     pdfDrop: {
       "to-images": { title: "Drag your PDFs here", meta: "Each page becomes an image · up to 200 MB per PDF" },
       "from-images": { title: "Drag your images here", meta: "JPG or PNG · one page per image, in the order you choose" },
       merge: { title: "Drag the PDFs you want to merge", meta: "You can reorder them before merging · up to 200 MB per PDF" },
       split: { title: "Drag the PDF you want to split", meta: "One page per file or the ranges you choose · up to 200 MB" },
+      organize: { title: "Drag the PDF you want to organize", meta: "Reorder, remove or rotate pages · up to 200 MB per PDF" },
+      compress: { title: "Drag the PDFs you want to compress", meta: "Shrink photos and scans · up to 200 MB per PDF" },
     },
   },
 };
 
 export const messagesFor = (lang) => messages[lang] ?? messages.es;
-export const t = messagesFor(globalThis.document?.documentElement.lang);
+// En un worker no hay documento: el idioma llega en el nombre del worker.
+export const t = messagesFor(globalThis.document?.documentElement.lang ?? globalThis.name);

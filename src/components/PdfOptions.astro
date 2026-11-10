@@ -36,6 +36,33 @@ const text = ui[lang].pdfOptions;
     <input type="text" id="pdfRanges" inputmode="numeric" autocomplete="off" placeholder={text.rangesPlaceholder} aria-describedby="rangesHint" />
     <p class="hint" id="rangesHint" aria-live="polite">{text.rangesHint}</p>
   </div>
+
+  <div id="organizeOptions" hidden>
+    <div class="field">
+      <label class="field-label" for="pdfOrder">{text.order}</label>
+      <input type="text" id="pdfOrder" inputmode="numeric" autocomplete="off" placeholder={text.orderPlaceholder} aria-describedby="orderHint" />
+      <p class="hint" id="orderHint" aria-live="polite">{text.orderHint}</p>
+    </div>
+    <div class="field dpi-field">
+      <label class="field-label" for="pdfRotate">{text.rotate}</label>
+      <select id="pdfRotate">
+        <option value="0" selected>{text.rotate0}</option>
+        <option value="90">{text.rotate90}</option>
+        <option value="180">{text.rotate180}</option>
+        <option value="270">{text.rotate270}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field" id="compressOptions" hidden>
+    <label class="field-label" for="pdfCompress">{text.compression}</label>
+    <select id="pdfCompress" aria-describedby="compressHint">
+      <option value="low">{text.compressLow}</option>
+      <option value="medium" selected>{text.compressMedium}</option>
+      <option value="high">{text.compressHigh}</option>
+    </select>
+    <p class="hint" id="compressHint">{text.compressHint}</p>
+  </div>
 </section>
 
 <style>

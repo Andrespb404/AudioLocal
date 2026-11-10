@@ -21,11 +21,12 @@ async function cacheSite() {
     for (const [asset] of html.matchAll(/\/_astro\/[^"'\s)]+/g)) urls.add(asset);
   }
   // Los scripts se dividen en partes que el HTML no nombra: hay que seguir lo que referencian.
-  // Se exige el hash del nombre: pdf.js también menciona "./pdf.worker.mjs", que no existe.
+  // Se exige el hash del nombre, tras punto o guion (los workers usan guion): pdf.js también menciona
+  // "./pdf.worker.mjs", que no existe.
   const pending = [...urls].filter((url) => url.endsWith(".js") && url.startsWith("/_astro/"));
   for (const script of pending) {
     const code = await (await fetch(script)).text();
-    for (const [, file] of code.matchAll(/["'`](?:\.\/|\/?_astro\/)([^"'`/]+\.[\w-]{8}\.m?js)["'`]/g)) {
+    for (const [, file] of code.matchAll(/["'`](?:\.\/|\/?_astro\/)([^"'`/]+[.-][\w-]{8}\.m?js)["'`]/g)) {
       const chunk = `/_astro/${file}`;
       if (!urls.has(chunk)) {
         urls.add(chunk);

@@ -3,10 +3,10 @@ import { ui } from '../i18n/ui.js';
 
 const { lang = 'es', preset = 'to-images' } = Astro.props;
 const text = ui[lang].pdfOptions;
-const modes = ['to-images', 'from-images', 'merge', 'split'];
+const modes = ['to-images', 'from-images', 'merge', 'split', 'organize', 'compress'];
 ---
 
-<div class="seg seg-four pdf-modes enter enter-1" id="pdfModes" role="radiogroup" aria-label={text.modesLabel}>
+<div class="seg seg-six pdf-modes enter enter-1" id="pdfModes" role="radiogroup" aria-label={text.modesLabel}>
   <span class="seg-slider" aria-hidden="true"></span>
   {
     modes.map((mode) => (
@@ -22,6 +22,18 @@ const modes = ['to-images', 'from-images', 'merge', 'split'];
 </div>
 
 <style>
+  /* Seis modos: 3 columnas por 2 filas (2 por 3 en el celular). El indicador rojo sigue a la opción elegida. */
+  .seg-six {
+    --cols: 3;
+    --rows: 2;
+  }
+
+  .seg-six:has(label:nth-of-type(2) input:checked) { --col: 1; --row: 0; }
+  .seg-six:has(label:nth-of-type(3) input:checked) { --col: 2; --row: 0; }
+  .seg-six:has(label:nth-of-type(4) input:checked) { --col: 0; --row: 1; }
+  .seg-six:has(label:nth-of-type(5) input:checked) { --col: 1; --row: 1; }
+  .seg-six:has(label:nth-of-type(6) input:checked) { --col: 2; --row: 1; }
+
   .pdf-modes {
     margin-top: 32px;
   }
@@ -39,5 +51,12 @@ const modes = ['to-images', 'from-images', 'merge', 'split'];
     .pdf-modes {
       margin-top: 24px;
     }
+
+    .seg-six { --cols: 2; --rows: 3; }
+    .seg-six:has(label:nth-of-type(2) input:checked) { --col: 1; --row: 0; }
+    .seg-six:has(label:nth-of-type(3) input:checked) { --col: 0; --row: 1; }
+    .seg-six:has(label:nth-of-type(4) input:checked) { --col: 1; --row: 1; }
+    .seg-six:has(label:nth-of-type(5) input:checked) { --col: 0; --row: 2; }
+    .seg-six:has(label:nth-of-type(6) input:checked) { --col: 1; --row: 2; }
   }
 </style>

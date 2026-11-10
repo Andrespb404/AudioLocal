@@ -1,7 +1,7 @@
 // Interfaz de la herramienta de PDF. Reutiliza la cola y las filas de las demás herramientas.
 import { formatBytes } from "./audio.js";
 import { t } from "./messages.js";
-import { baseName, imagesToPdf, mergePdfs, pageCount, pdfToImages, splitPdf } from "./pdf.js";
+import { baseName, compressPdf, imagesToPdf, mergePdfs, organizePdf, pageCount, pdfToImages, splitPdf } from "./pdf.js";
 import { STATUS, conversionLabel, countByStatus, createItem, errorSummary, hasUnsavedResults, requeue, runQueue, uniqueName } from "./queue.js";
 import { parseRanges } from "./ranges.js";
 import { $, UserError, ZIP_MAX_BYTES, animateRowOut, bindFilePicker, saveFile, setRowButton, setText, showToast, zipBlobs } from "./shared-ui.js";
@@ -14,6 +14,8 @@ const MODES = {
   "from-images": { accept: ".jpg,.jpeg,.png,image/jpeg,image/png", ordered: true, kind: "image" },
   merge: { accept: ".pdf,application/pdf", ordered: true, kind: "pdf" },
   split: { accept: ".pdf,application/pdf", ordered: false, kind: "pdf" },
+  organize: { accept: ".pdf,application/pdf", ordered: false, kind: "pdf" },
+  compress: { accept: ".pdf,application/pdf", ordered: false, kind: "pdf" },
 };
 
 const modeRadios = [...document.querySelectorAll('input[name="pdfMode"]')];
@@ -21,6 +23,10 @@ const imageFormatRadios = [...document.querySelectorAll('input[name="imageFormat
 const dpiSelect = $("pdfDpi");
 const rangesInput = $("pdfRanges");
 const rangesHintText = $("rangesHint").textContent;
+const orderInput = $("pdfOrder");
+const orderHintText = $("orderHint").textContent;
+// Campo de páginas de cada modo que lo usa: se valida al escribir, antes de convertir.
+const PAGE_FIELDS = { split: [rangesInput, "rangesHint", rangesHintText], organize: [orderInput, "orderHint", orderHintText] };
 const queueList = $("queueList");
 const rowTemplate = $("queueRowTemplate");
 const btnConvert = $("btnConvert");
@@ -56,7 +62,11 @@ function rowMeta(item) {
   if (item.status === STATUS.ANALYZING) return t.analyzing;
   if (item.status === STATUS.CONVERTING) return `${item.stage || t.converting}… ${item.progress}%`;
   const size = formatBytes(item.file.size);
-  if (item.status === STATUS.DONE && item.result) return `${t.filesCreated(item.result.count)} · ${formatBytes(item.result.blob.size)}`;
+  if (item.status === STATUS.DONE && item.result) {
+    const { count, blob, before, note } = item.result;
+    const size = before ? `${formatBytes(blob.size)} (${t.before(formatBytes(before))})` : formatBytes(blob.size);
+    return [`${t.filesCreated(count)} · ${size}`, note].filter(Boolean).join(" · ");
+  }
   return item.meta?.pages ? `${t.pagesCount(item.meta.pages)} · ${size}` : size;
 }
 
@@ -125,15 +135,21 @@ function updateState() {
   $("btnAddMore").hidden = running && mode().ordered;
 
   const currentModeName = currentMode();
-  $("optionsSection").hidden = state !== "queue" || running || !["to-images", "split"].includes(currentModeName);
+  $("optionsSection").hidden = state !== "queue" || running || ["from-images", "merge"].includes(currentModeName);
   $("imageOptions").hidden = currentModeName !== "to-images";
   $("splitOptions").hidden = currentModeName !== "split";
+  $("organizeOptions").hidden = currentModeName !== "organize";
+  $("compressOptions").hidden = currentModeName !== "compress";
 
   btnConvert.hidden = running || state === "done";
   const needsTwo = currentModeName === "merge" && counts.pending === 1;
-  const badRanges = currentModeName === "split" && items.find((item) => item.status === STATUS.PENDING && !parseRanges(rangesInput.value, item.meta.pages));
-  rangesInput.setAttribute("aria-invalid", String(Boolean(badRanges)));
-  setText($("rangesHint"), badRanges ? t.rangesInvalid(badRanges.meta.pages) : rangesHintText);
+  let badRanges = null;
+  for (const [mode, [input, hintId, hintText]] of Object.entries(PAGE_FIELDS)) {
+    const bad = currentModeName === mode && items.find((item) => item.status === STATUS.PENDING && !parseRanges(input.value, item.meta.pages));
+    input.setAttribute("aria-invalid", String(Boolean(bad)));
+    setText($(hintId), bad ? t.rangesInvalid(bad.meta.pages) : hintText);
+    badRanges ||= bad;
+  }
   btnConvert.disabled = counts.pending === 0 || needsTwo || Boolean(badRanges);
   setText(btnConvert, needsTwo ? t.needTwo : counts.pending === 0 && counts.analyzing ? t.analyzing : t.pdfActions[currentModeName]);
   btnCancel.hidden = !running;
@@ -230,6 +246,8 @@ const hasUnsaved = () => hasUnsavedResults(items.filter((item) => item.result)) 
 // ==================== CONVERTIR ====================
 function settingsFor(name) {
   if (name === "to-images") return { format: imageFormatRadios.find((radio) => radio.checked).value, dpi: Number(dpiSelect.value) };
+  if (name === "organize") return { order: orderInput.value, rotate: Number($("pdfRotate").value) };
+  if (name === "compress") return { level: $("pdfCompress").value };
   return { ranges: rangesInput.value };
 }
 
@@ -248,6 +266,8 @@ async function perFile(name, signal) {
       };
       let outputs;
       if (name === "to-images") outputs = await pdfToImages(item.file, settings, report);
+      else if (name === "organize") outputs = [await organizePdf(item.file, settings, report)];
+      else if (name === "compress") outputs = [await compressPdf(item.file, settings, report)];
       else {
         const ranges = parseRanges(settings.ranges, item.meta.pages);
         if (!ranges) throw new UserError(t.rangesInvalid(item.meta.pages));
@@ -462,6 +482,7 @@ modeRadios.forEach((radio) => radio.addEventListener("change", changeMode));
 imageFormatRadios.forEach((radio) => radio.addEventListener("change", saveSettings));
 dpiSelect.addEventListener("change", saveSettings);
 rangesInput.addEventListener("input", updateState);
+orderInput.addEventListener("input", updateState);
 btnConvert.addEventListener("click", start);
 // Cancelar aparece bajo el cursor al convertir: el segundo clic de un doble clic no debe cancelar.
 btnCancel.addEventListener("click", (event) => {

@@ -5,7 +5,7 @@ Hoy todas las herramientas funcionan en el navegador.
 ## Herramientas
 - **Audio:** MP3, WAV, OGG, AAC, M4A y FLAC, en lotes. También saca el audio de un video.
 - **Video:** convierte y comprime MP4, MOV, M4V, MKV, WebM y TS.
-- **PDF:** PDF a imágenes, imágenes a PDF, unir y dividir.
+- **PDF:** PDF a imágenes, imágenes a PDF, unir, dividir, organizar (orden y giro) y comprimir.
 
 ## Stack
 - Astro (sitio estático, sin frameworks de UI)

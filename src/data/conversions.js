@@ -642,6 +642,126 @@ export const conversions = [
       ],
     },
   },
+  {
+    id: 'compress-pdf',
+    tool: 'pdf',
+    format: 'compress',
+    slugs: { es: 'comprimir-pdf', en: 'compress-pdf' },
+    es: {
+      name: 'Comprimir PDF',
+      title: 'Comprimir PDF gratis y sin registro | AudioLocal',
+      description: 'Reduce el peso de un PDF con fotos o escaneos en tu navegador. Gratis, sin subir el documento y sin anuncios.',
+      h1: 'Comprimir PDF gratis, sin registro',
+      intro: 'Haz que un PDF pese menos para enviarlo por correo o subirlo a un formulario. Las fotos se reducen y el texto queda igual.',
+      when: [
+        'Un formulario o un correo no acepta el PDF por su tamaño.',
+        'El documento es un escaneo o lleva muchas fotos.',
+        'Quieres guardar documentos ocupando menos espacio.',
+      ],
+      expect: 'Reduce sobre todo los PDF con fotos o escaneos. Un PDF de solo texto casi no cambia: en ese caso verás un aviso y se entregará sin cambios. El texto sigue siendo seleccionable.',
+      faq: [
+        { question: '¿Qué nivel de compresión elijo?', answer: 'Media funciona bien para la mayoría. Usa Fuerte si necesitas el menor peso, aunque las fotos pierden nitidez, y Ligera si quieres conservar más calidad.' },
+        { question: '¿Mis documentos se suben a algún servidor?', answer: 'No. La compresión ocurre en tu navegador y el documento nunca sale de tu dispositivo.' },
+      ],
+    },
+    en: {
+      name: 'Compress PDF',
+      title: 'Compress PDF for free, with no sign-up | AudioLocal',
+      description: 'Shrink a PDF with photos or scans in your browser. Free, with no document uploads and no ads.',
+      h1: 'Compress PDF for free, with no sign-up',
+      intro: 'Make a PDF smaller so you can email it or upload it to a form. The photos are reduced and the text stays the same.',
+      when: [
+        'A form or an email won\'t accept the PDF because of its size.',
+        'The document is a scan or has many photos.',
+        'You want to store documents in less space.',
+      ],
+      expect: 'It mainly shrinks PDFs with photos or scans. A text-only PDF barely changes: in that case you will see a notice and get it unchanged. The text stays selectable.',
+      faq: [
+        { question: 'Which compression level should I choose?', answer: 'Medium works well for most files. Use Strong if you need the smallest size, though photos lose sharpness, and Light to keep more quality.' },
+        { question: 'Are my documents uploaded to a server?', answer: 'No. Compression happens in your browser and the document never leaves your device.' },
+      ],
+    },
+  },
+  {
+    id: 'rotate-pdf',
+    tool: 'pdf',
+    format: 'organize',
+    slugs: { es: 'rotar-pdf', en: 'rotate-pdf' },
+    es: {
+      name: 'Girar PDF',
+      title: 'Girar páginas de un PDF gratis | AudioLocal',
+      description: 'Gira las páginas de un PDF 90° o 180° en tu navegador. Gratis, sin subir el documento y sin anuncios.',
+      h1: 'Girar PDF gratis, sin registro',
+      intro: 'Endereza un escaneo de lado o una página al revés. Elige el giro y descarga el PDF corregido.',
+      when: [
+        'Escaneaste un documento y quedó de lado.',
+        'Una página horizontal se ve girada en el visor.',
+        'Necesitas imprimir el PDF con la orientación correcta.',
+      ],
+      expect: 'El giro se aplica a todas las páginas que elijas en "Páginas y orden"; déjalo vacío para girarlas todas. El contenido no se recomprime, así que no pierde calidad.',
+      faq: [
+        { question: '¿Puedo girar solo algunas páginas?', answer: 'Esta herramienta gira todas las páginas que conserves. Para girar solo algunas, divide el PDF, gira la parte que necesites y vuelve a unirlo.' },
+        { question: '¿Se pierde calidad?', answer: 'No. Girar solo cambia la orientación de la página; el contenido queda igual.' },
+      ],
+    },
+    en: {
+      name: 'Rotate PDF',
+      title: 'Rotate PDF pages for free | AudioLocal',
+      description: 'Rotate the pages of a PDF by 90° or 180° in your browser. Free, with no document uploads and no ads.',
+      h1: 'Rotate PDF for free, with no sign-up',
+      intro: 'Straighten a sideways scan or an upside-down page. Choose the rotation and download the fixed PDF.',
+      when: [
+        'You scanned a document and it came out sideways.',
+        'A landscape page shows up rotated in the viewer.',
+        'You need to print the PDF the right way up.',
+      ],
+      expect: 'The rotation applies to every page you keep in "Pages and order"; leave it empty to rotate them all. The content isn\'t recompressed, so it loses no quality.',
+      faq: [
+        { question: 'Can I rotate only some pages?', answer: 'This tool rotates every page you keep. To rotate only some, split the PDF, rotate the part you need and merge it back.' },
+        { question: 'Do I lose quality?', answer: 'No. Rotating only changes the page orientation; the content stays the same.' },
+      ],
+    },
+  },
+  {
+    id: 'organize-pdf',
+    tool: 'pdf',
+    format: 'organize',
+    slugs: { es: 'ordenar-pdf', en: 'organize-pdf' },
+    es: {
+      name: 'Ordenar páginas de un PDF',
+      title: 'Ordenar o quitar páginas de un PDF gratis | AudioLocal',
+      description: 'Cambia el orden de las páginas de un PDF o quita las que sobran, en tu navegador. Gratis, sin registro y sin anuncios.',
+      h1: 'Ordenar páginas de un PDF gratis',
+      intro: 'Escribe las páginas en el orden que quieras, por ejemplo "3, 1-2", y descarga el PDF reorganizado. Las que no escribas se quitan.',
+      when: [
+        'Las páginas de un escaneo quedaron desordenadas.',
+        'Quieres quitar páginas en blanco o que sobran.',
+        'Necesitas poner una portada o un anexo en otro lugar.',
+      ],
+      expect: 'Se crea un PDF nuevo con las páginas en el orden indicado. Puedes repetir una página escribiéndola dos veces. El contenido no se recomprime.',
+      faq: [
+        { question: '¿Cómo quito una página?', answer: 'No la escribas. Por ejemplo, en un PDF de 5 páginas, "1-2, 4-5" quita la 3.' },
+        { question: '¿Puedo ver las páginas antes de ordenarlas?', answer: 'Todavía no hay miniaturas. Puedes pasar el PDF a imágenes para ver cada página y luego ordenar con sus números.' },
+      ],
+    },
+    en: {
+      name: 'Reorder PDF pages',
+      title: 'Reorder or remove PDF pages for free | AudioLocal',
+      description: 'Change the order of the pages in a PDF or remove the ones you don\'t need, in your browser. Free, no sign-up, no ads.',
+      h1: 'Reorder PDF pages for free',
+      intro: 'Type the pages in the order you want, for example "3, 1-2", and download the reorganized PDF. Pages you leave out are removed.',
+      when: [
+        'The pages of a scan came out in the wrong order.',
+        'You want to remove blank or unneeded pages.',
+        'You need to move a cover or an appendix.',
+      ],
+      expect: 'A new PDF is created with the pages in the order you typed. You can repeat a page by typing it twice. The content isn\'t recompressed.',
+      faq: [
+        { question: 'How do I remove a page?', answer: 'Leave it out. For example, in a 5-page PDF, "1-2, 4-5" removes page 3.' },
+        { question: 'Can I see the pages before reordering?', answer: 'There are no thumbnails yet. You can turn the PDF into images to see each page, then reorder by number.' },
+      ],
+    },
+  },
 ];
 
 export function conversionPaths(lang) {
