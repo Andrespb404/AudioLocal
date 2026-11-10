@@ -27,6 +27,7 @@ import {
   uniqueName,
 } from "./queue.js";
 import { t } from "./messages.js";
+import { applyTrimPoint, formatTime, trimmedDuration } from "./trim.js";
 import { audioSettings } from "./settings-audio.js";
 import { videoSettings } from "./settings-video.js";
 import { $, UserError, ZIP_MAX_BYTES, animateRowOut, bindFilePicker, saveFile, setRowButton, setText, showToast, zipBlobs } from "./shared-ui.js";
@@ -77,14 +78,16 @@ function rowMeta(item, current) {
   if (item.status === STATUS.ANALYZING) return t.analyzing;
   if (item.status === STATUS.CONVERTING) return `${item.stage || t.converting}… ${item.progress}%`;
 
-  const duration = formatDuration(item.meta.duration);
+  const seconds = trimmedDuration(item.trim, item.meta.duration);
+  const duration = formatDuration(seconds);
+  const trim = item.trim ? [t.trimmed(formatTime(item.trim.start), formatTime(item.trim.end))] : [];
   if (item.status === STATUS.DONE) {
     const { format, blob, warnings } = item.result;
-    return [`${format} · ${duration} · ${formatBytes(blob.size)} (${t.before(formatBytes(item.file.size))})`, ...warnings].join(" · ");
+    return [`${format} · ${duration} · ${formatBytes(blob.size)} (${t.before(formatBytes(item.file.size))})`, ...trim, ...warnings].join(" · ");
   }
+  if (TOOL === "video") return [`${getFileFormatLabel(item.file)} · ${duration} · ${item.meta.width}×${item.meta.height} · ${formatBytes(item.file.size)}`, ...trim].join(" · ");
   const source = `${getFileFormatLabel(item.file)} · ${duration} · ${formatBytes(item.file.size)}`;
-  if (TOOL === "video") return `${getFileFormatLabel(item.file)} · ${duration} · ${item.meta.width}×${item.meta.height} · ${formatBytes(item.file.size)}`;
-  return `${source} → ≈ ${formatBytes(estimateOutputBytes(item.meta, current))}`;
+  return [`${source} → ≈ ${formatBytes(estimateOutputBytes({ ...item.meta, duration: seconds }, current))}`, ...trim].join(" · ");
 }
 
 function createRow(item, order = 0) {
@@ -303,9 +306,12 @@ async function startConversion() {
         },
       };
       let result;
-      if (TOOL === "video") result = await (await loadVideoModule()).convertVideo(item.file, current, report);
-      else if (canStream(item, current)) result = await (await loadVideoModule()).extractAudio(item.file, current, report);
+      const options = item.trim ? { ...current, trim: item.trim } : current;
+      if (TOOL === "video") result = await (await loadVideoModule()).convertVideo(item.file, options, report);
+      else if (canStream(item, current)) result = await (await loadVideoModule()).extractAudio(item.file, options, report);
       else {
+        // Solo el camino que lee por partes sabe recortar: convertir el archivo entero no sería lo que se pidió.
+        if (item.trim) throw new UserError(t.trimNeedsFormat);
         // El camino clásico carga todo en memoria: un archivo que solo cabía leyéndolo por partes no puede usarlo.
         if (item.file.size > MAX_FILE_SIZE) throw new UserError(t.tooLarge);
         if (item.meta.duration > MAX_DURATION_SECONDS) throw new UserError(t.tooLong);
@@ -417,6 +423,30 @@ function renderPlayer() {
   $("playerName").textContent = item.file.name;
   $("playerName").title = item.file.name;
   $("playerMeta").textContent = playerMetaText(item);
+
+  // Se recorta sobre el original; el camino clásico no sabe recortar.
+  $("playerTrim").hidden = !item.streamed || source() !== "original";
+  const busy = item.status === STATUS.CONVERTING;
+  for (const id of ["btnTrimStart", "btnTrimEnd", "btnTrimClear"]) $(id).disabled = busy;
+  $("btnTrimClear").hidden = !item.trim;
+  setText($("trimStatus"), item.trim ? t.trimmed(formatTime(item.trim.start), formatTime(item.trim.end)) : "");
+}
+
+/** Marca el inicio o el fin del recorte en la posición actual, o lo quita. Un resultado ya hecho deja de valer. */
+function setTrim(which) {
+  const item = selected;
+  if (!item || item.status === STATUS.CONVERTING) return;
+  const trim = which === "clear" ? null : applyTrimPoint(item.trim, which, audio.currentTime, item.meta.duration);
+  if (JSON.stringify(trim) === JSON.stringify(item.trim ?? null)) return;
+  if (item.result) {
+    if (!item.downloaded && !confirm(t.confirmReconvert)) return;
+    URL.revokeObjectURL(item.result.url);
+    requeue(item);
+  }
+  item.trim = trim;
+  updateRow(item);
+  updateState();
+  renderPlayer();
 }
 
 function loadAudio(time = 0, resume = false) {
@@ -526,6 +556,9 @@ btnClear.addEventListener("click", () => {
 });
 
 $("btnPlay").addEventListener("click", togglePlay);
+$("btnTrimStart").addEventListener("click", () => setTrim("start"));
+$("btnTrimEnd").addEventListener("click", () => setTrim("end"));
+$("btnTrimClear").addEventListener("click", () => setTrim("clear"));
 $("btnPlayerClose").addEventListener("click", () => {
   const row = selected && rows.get(selected.id);
   selectItem(null);

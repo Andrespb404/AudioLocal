@@ -3,6 +3,8 @@ const messages = {
   es: {
     locale: "es",
     convertedSuffix: "Convertido",
+    trimmed: (start, end) => `Recorte ${start}–${end}`,
+    trimNeedsFormat: "En este navegador, el recorte solo funciona al convertir a MP3 o WAV.",
     reloadNeeded: "Esta página quedó desactualizada. Recárgala e inténtalo de nuevo.",
     imageTooLarge: "Esta imagen PNG es demasiado grande. Usa una de menos de 64 megapíxeles.",
     invalidFormat: "Formato no válido. Usa MP3, WAV, OGG, OPUS, AAC, M4A, FLAC o un video MP4, MOV, MKV o WebM.",
@@ -98,6 +100,8 @@ const messages = {
   en: {
     locale: "en",
     convertedSuffix: "Converted",
+    trimmed: (start, end) => `Trim ${start}–${end}`,
+    trimNeedsFormat: "In this browser, trimming only works when converting to MP3 or WAV.",
     reloadNeeded: "This page is out of date. Reload it and try again.",
     imageTooLarge: "This PNG image is too large. Use one under 64 megapixels.",
     invalidFormat: "Unsupported format. Use MP3, WAV, OGG, OPUS, AAC, M4A, FLAC or an MP4, MOV, MKV or WebM video.",

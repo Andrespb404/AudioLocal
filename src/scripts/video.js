@@ -138,7 +138,8 @@ export async function convertVideo(file, settings, { onProgress = () => {}, onWa
     if (QUALITIES[settings.quality]) video.quality = QUALITIES[settings.quality];
 
     const format = container.format(file.size);
-    const { blob, discarded } = await runConversion({ input, format, video, audio }, container.mime, { onProgress, signal }, t.converting);
+    const trim = settings.trim ? { trim: settings.trim } : {};
+    const { blob, discarded } = await runConversion({ input, format, video, audio, ...trim }, container.mime, { onProgress, signal }, t.converting);
     if (discarded.some(({ track: lost, reason }) => lost.isAudioTrack() && reason !== "discarded_by_user")) onWarning(t.audioDropped);
     if (audioTracks.length > 1) onWarning(t.extraTracksDropped);
     return { blob, ext: container.ext, format: container.label, width, height };
@@ -150,16 +151,16 @@ export async function convertVideo(file, settings, { onProgress = () => {}, onWa
   }
 }
 
-/** Mayor valor absoluto del audio, para normalizar sin cargar el archivo completo en memoria. */
-async function findPeak(track, onProgress, duration, signal) {
+/** Mayor valor absoluto del audio (o del fragmento recortado), para normalizar sin cargar el archivo en memoria. */
+async function findPeak(track, onProgress, duration, signal, trim) {
   let peak = 0;
-  for await (const sample of new AudioSampleSink(track).samples()) {
+  for await (const sample of new AudioSampleSink(track).samples(trim?.start, trim?.end)) {
     for (let plane = 0; plane < sample.numberOfChannels; plane++) {
       const data = new Float32Array(sample.numberOfFrames);
       sample.copyTo(data, { planeIndex: plane, format: "f32-planar" });
       for (const value of data) peak = Math.max(peak, Math.abs(value));
     }
-    onProgress(Math.round((sample.timestamp / duration) * 30), t.normalizing);
+    onProgress(Math.round(((sample.timestamp - (trim?.start ?? 0)) / duration) * 30), t.normalizing);
     sample.close();
     signal?.throwIfAborted();
   }
@@ -184,15 +185,24 @@ function applyGain(sample, gain) {
 }
 
 /** MP3 por partes con lamejs: el audio nunca se carga completo en memoria. */
-async function encodeTrackToMp3(track, { channels, bitrate, gain, duration, start, onProgress, signal }) {
+async function encodeTrackToMp3(track, { channels, bitrate, gain, duration, start, onProgress, signal, trim }) {
   const encoder = mp3StreamEncoder(channels, track.sampleRate, bitrate);
+  const from = trim?.start ?? 0;
+  const to = trim?.end ?? Infinity;
   let lastPause = performance.now();
-  for await (const sample of new AudioSampleSink(track).samples()) {
+  for await (const sample of new AudioSampleSink(track).samples(trim?.start, trim?.end)) {
+    // Los fragmentos del archivo no coinciden con el recorte: se descarta lo que cae fuera, muestra a muestra.
+    const first = Math.max(0, Math.round((from - sample.timestamp) * sample.sampleRate));
+    const last = Math.min(sample.numberOfFrames, Math.round((to - sample.timestamp) * sample.sampleRate));
+    if (last <= first) {
+      sample.close();
+      continue;
+    }
     const planes = [];
     for (let plane = 0; plane < Math.min(sample.numberOfChannels, 2); plane++) {
       const data = new Float32Array(sample.numberOfFrames);
       sample.copyTo(data, { planeIndex: plane, format: "f32-planar" });
-      planes.push(data);
+      planes.push(data.subarray(first, last));
     }
     let left = planes[0];
     let right = planes[1] ?? left;
@@ -201,7 +211,7 @@ async function encodeTrackToMp3(track, { channels, bitrate, gain, duration, star
       right = left;
     }
     encoder.push(left, right, gain);
-    onProgress(Math.min(99, Math.round(start + (sample.timestamp / duration) * (99 - start))), t.encoding("MP3"));
+    onProgress(Math.min(99, Math.round(start + ((sample.timestamp - from) / duration) * (99 - start))), t.encoding("MP3"));
     sample.close();
     signal?.throwIfAborted();
     // Cede el control cada 50 ms para mantener la interfaz fluida. Hacerlo en cada fragmento sumaba minutos de espera en audios largos.
@@ -248,11 +258,13 @@ export async function extractAudio(file, settings, { onProgress = () => {}, sign
     const formatInfo = FORMAT_MAP[settings.format] ?? FORMAT_MAP.mp3_256;
     const track = await input.getPrimaryAudioTrack();
     if (!track) throw new UserError(t.noAudioTrack);
-    const duration = await input.computeDuration();
+    const { trim } = settings;
+    const duration = trim ? trim.end - trim.start : await input.computeDuration();
+    const trimOption = trim ? { trim } : {};
     const report = { onProgress, signal };
 
     onProgress(2, t.extracting);
-    const gain = settings.normalize ? await findPeak(track, onProgress, duration, signal) : 1;
+    const gain = settings.normalize ? await findPeak(track, onProgress, duration, signal, trim) : 1;
     const start = settings.normalize ? 30 : 0;
     const rate = targetSampleRate(settings, track.sampleRate, formatInfo);
     const channels = settings.channels;
@@ -265,7 +277,7 @@ export async function extractAudio(file, settings, { onProgress = () => {}, sign
       let source = track;
       if (rate !== track.sampleRate || track.numberOfChannels > 2) {
         const { blob } = await runConversion(
-          { input, format: new WavOutputFormat(), video: { discard: true }, audio: { sampleRate: rate, numberOfChannels: channels } },
+          { input, format: new WavOutputFormat(), video: { discard: true }, audio: { sampleRate: rate, numberOfChannels: channels }, ...trimOption },
           "audio/wav",
           { onProgress: (progress, stage) => onProgress(Math.round(progress / 2), stage), signal, start },
           t.resampling,
@@ -273,7 +285,8 @@ export async function extractAudio(file, settings, { onProgress = () => {}, sign
         pcmInput = openInput(blob);
         source = await pcmInput.getPrimaryAudioTrack();
       }
-      const mp3 = await encodeTrackToMp3(source, { channels, bitrate: formatInfo.bitrate, gain, duration, start: Math.max(start, source === track ? 0 : 50), onProgress, signal });
+      // El WAV intermedio ya sale recortado: solo hay que recortar al leer directo del original.
+      const mp3 = await encodeTrackToMp3(source, { channels, bitrate: formatInfo.bitrate, gain, duration, start: Math.max(start, source === track ? 0 : 50), onProgress, signal, trim: source === track ? trim : null });
       // `raw` son etiquetas en el formato de origen (por ejemplo, de FLAC): no valen para ID3.
       const { raw: _raw, ...tags } = await input.getMetadataTags();
       return { ...result, blob: await tagMp3(mp3, tags) };
@@ -299,7 +312,7 @@ export async function extractAudio(file, settings, { onProgress = () => {}, sign
       mime = "audio/mp4";
       audio.codec = "aac";
     }
-    const { blob } = await runConversion({ input, format, video: { discard: true }, audio }, mime, { ...report, start }, t.extracting);
+    const { blob } = await runConversion({ input, format, video: { discard: true }, audio, ...trimOption }, mime, { ...report, start }, t.extracting);
     return { ...result, blob };
   } catch (err) {
     if (signal?.aborted) throw err;

@@ -23,6 +23,12 @@ const text = ui[lang];
         <input type="range" id="playerSeek" min="0" max="0" step="0.1" value="0" aria-label={text.player.position} />
         <span id="playerTotal">0:00</span>
       </div>
+      <div class="player-trim" id="playerTrim" hidden>
+        <button type="button" class="text-btn" id="btnTrimStart">{text.player.trimStart}</button>
+        <button type="button" class="text-btn" id="btnTrimEnd">{text.player.trimEnd}</button>
+        <button type="button" class="text-btn" id="btnTrimClear" hidden>{text.player.trimClear}</button>
+        <span class="trim-status" id="trimStatus" role="status"></span>
+      </div>
     </div>
 
     <div class="seg player-compare" id="playerCompare" role="radiogroup" aria-label={text.player.compare} hidden>
@@ -129,6 +135,19 @@ const text = ui[lang];
     color: var(--muted);
     font-size: 0.8125rem;
     white-space: nowrap;
+  }
+
+  .player-trim {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 16px;
+    margin-top: 4px;
+    font-size: 0.8125rem;
+  }
+
+  .trim-status {
+    color: var(--red-text);
   }
 
   .player-seek {
