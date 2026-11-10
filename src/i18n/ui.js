@@ -25,6 +25,15 @@ export const ui = {
       fullText: 'Ver el texto completo',
     },
     loadError: 'No se pudo cargar la herramienta. Revisa tu conexión y recarga la página.',
+    verify: {
+      title: 'Compruébalo tú mismo',
+      lead: 'No tienes que creernos: las herramientas funcionan sin internet, así que tus archivos no pueden subirse.',
+      steps: [
+        'Abre esta página y espera a que el pie diga "Listo sin conexión".',
+        'Desconéctate: activa el modo avión o apaga el wifi.',
+        'Agrega un archivo y conviértelo. Si funciona sin conexión, nada salió de tu dispositivo.',
+      ],
+    },
     notFound: { title: 'Página no encontrada | AudioLocal', description: 'Esta página no existe.', heading: 'Esta página no existe', lead: 'Puede que el enlace esté mal o que la página se haya movido.', home: 'Ir a AudioLocal' },
     navLabel: 'Principal',
     brandLabel: 'AudioLocal, inicio',
@@ -239,6 +248,15 @@ export const ui = {
       fullText: 'Show the full text',
     },
     loadError: 'The tool couldn\'t load. Check your connection and reload the page.',
+    verify: {
+      title: 'Check it yourself',
+      lead: 'You don\'t have to take our word for it: the tools work without internet, so your files can\'t be uploaded.',
+      steps: [
+        'Open this page and wait for the footer to say "Ready to work offline".',
+        'Go offline: turn on airplane mode or switch off Wi-Fi.',
+        'Add a file and convert it. If it works offline, nothing left your device.',
+      ],
+    },
     notFound: { title: 'Page not found | AudioLocal', description: 'This page doesn\'t exist.', heading: 'This page doesn\'t exist', lead: 'The link may be wrong, or the page may have moved.', home: 'Go to AudioLocal' },
     navLabel: 'Main',
     brandLabel: 'AudioLocal, home',

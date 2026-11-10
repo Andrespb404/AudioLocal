@@ -1,0 +1,21 @@
+---
+// "Compruébalo tú mismo": la prueba de privacidad que cualquiera puede hacer, sin creer en nuestra palabra.
+import { ui } from '../i18n/ui.js';
+
+const { lang = 'es', class: className = 'card prose reveal' } = Astro.props;
+const text = ui[lang].verify;
+---
+
+<section class:list={[className, 'verify']} aria-labelledby="verifyTitle">
+  <h2 id="verifyTitle">{text.title}</h2>
+  <p>{text.lead}</p>
+  <ol>
+    {text.steps.map((step) => <li>{step}</li>)}
+  </ol>
+</section>
+
+<style>
+  .verify {
+    margin-top: 16px;
+  }
+</style>

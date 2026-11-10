@@ -4,6 +4,7 @@ import Coffee from './Coffee.astro';
 import ConversionLinks from './ConversionLinks.astro';
 import ConverterTool from './ConverterTool.astro';
 import Faq from './Faq.astro';
+import VerifyOffline from './VerifyOffline.astro';
 import { appJsonLd, ui } from '../i18n/ui.js';
 
 const { lang, tool = 'audio' } = Astro.props;
@@ -39,6 +40,7 @@ if (tool === 'audio') schemas.unshift({ '@context': 'https://schema.org', '@type
   </section>
 
   <ConversionLinks lang={lang} tool={tool} />
+  <VerifyOffline lang={lang} />
 
   <section class="card prose reveal seo">
     <h2>{page.seoTitle}</h2>

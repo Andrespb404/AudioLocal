@@ -4,6 +4,7 @@ import Coffee from './Coffee.astro';
 import ConversionLinks from './ConversionLinks.astro';
 import ConverterTool from './ConverterTool.astro';
 import Faq from './Faq.astro';
+import VerifyOffline from './VerifyOffline.astro';
 import { conversionPath } from '../data/conversions.js';
 import { appJsonLd, ui } from '../i18n/ui.js';
 
@@ -37,6 +38,7 @@ const path = conversionPath(conversion, lang);
   </section>
 
   <ConversionLinks lang={lang} tool={conversion.tool} current={conversion.id} />
+  <VerifyOffline lang={lang} />
   <Faq lang={lang} items={page.faq} />
 </Base>
 
