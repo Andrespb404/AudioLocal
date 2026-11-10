@@ -136,10 +136,10 @@ export const conversions = [
         'Tu auto o equipo de música no reproduce FLAC.',
         'Quieres una copia liviana para escuchar y conservar el original.',
       ],
-      expect: 'FLAC no tiene pérdida y MP3 sí, así que guarda tus FLAC originales. Cada archivo puede pesar hasta 150 MB, y las etiquetas como artista o carátula no se copian al MP3.',
+      expect: 'FLAC no tiene pérdida y MP3 sí, así que guarda tus FLAC originales. Cada archivo puede pesar hasta 2 GB, y las etiquetas como el artista y la carátula se copian al MP3.',
       faq: [
         { question: '¿Qué calidad conviene para música?', answer: '320 kbps es la opción más cercana al original y 256 kbps ahorra algo más de espacio con una diferencia difícil de notar para la mayoría.' },
-        { question: '¿Se conservan el artista y la carátula?', answer: 'No. AudioLocal convierte solo el audio, así que tendrás que volver a agregar esas etiquetas si las necesitas.' },
+        { question: '¿Se conservan el artista y la carátula?', answer: 'Sí. El título, el artista, el álbum y la carátula del FLAC se copian al MP3.' },
       ],
     },
     en: {
@@ -153,10 +153,10 @@ export const conversions = [
         'Your car or stereo won\'t play FLAC.',
         'You want a lightweight listening copy and plan to keep the original.',
       ],
-      expect: 'FLAC is lossless and MP3 isn\'t, so keep your original FLAC files. Each file can be up to 150 MB, and tags such as artist or cover art are not copied to the MP3.',
+      expect: 'FLAC is lossless and MP3 isn\'t, so keep your original FLAC files. Each file can be up to 2 GB, and tags such as artist and cover art are copied to the MP3.',
       faq: [
         { question: 'What quality is best for music?', answer: '320 kbps is closest to the original, while 256 kbps saves a bit more space with a difference most people won\'t notice.' },
-        { question: 'Are artist tags and cover art kept?', answer: 'No. AudioLocal converts only the audio, so you will need to add those tags again if you want them.' },
+        { question: 'Are artist tags and cover art kept?', answer: 'Yes. The title, artist, album and cover art from the FLAC are copied to the MP3.' },
       ],
     },
   },

@@ -23,7 +23,7 @@ const SUPPORTED_AUDIO_TYPES = [
   "audio/flac",
   "audio/x-flac",
 ];
-const SUPPORTED_FILE_EXTENSIONS = ["mp3", "wav", "ogg", "aac", "m4a", "flac"];
+const SUPPORTED_FILE_EXTENSIONS = ["mp3", "wav", "ogg", "opus", "aac", "m4a", "flac"];
 const VIDEO_EXTENSIONS = ["mp4", "m4v", "mov", "mkv", "webm", "ts"];
 const UNSUPPORTED_VIDEO_TYPES = ["video/x-msvideo", "video/avi", "video/x-ms-wmv", "video/x-flv"];
 
@@ -75,7 +75,7 @@ export function isVideoFile(file) {
 
 /**
  * Motivo de rechazo de un archivo, o null si es válido.
- * `streaming`: el navegador puede leer video por partes. Sin eso, un video se decodifica completo como un audio.
+ * `streaming`: el navegador puede leer el archivo por partes. Sin eso, se decodifica completo en memoria.
  */
 export function validateFile(file, tool = "audio", streaming = typeof AudioDecoder !== "undefined") {
   const video = isVideoFile(file);
@@ -84,7 +84,7 @@ export function validateFile(file, tool = "audio", streaming = typeof AudioDecod
     return file.size > MAX_VIDEO_SIZE ? t.videoTooLarge : null;
   }
   if (!video && !isSupportedAudioFile(file)) return t.invalidFormat;
-  if (video && streaming) return file.size > MAX_VIDEO_SIZE ? t.videoTooLarge : null;
+  if (streaming) return file.size > MAX_VIDEO_SIZE ? t.videoTooLarge : null;
   return file.size > MAX_FILE_SIZE ? t.tooLarge : null;
 }
 
@@ -102,6 +102,12 @@ export function getFileFormatLabel(file) {
 
 export function formatLabel(formatInfo) {
   return formatInfo.type === "aac" ? "AAC" : formatInfo.ext.toUpperCase();
+}
+
+/** Largo de la cabecera ID3v2 con que empieza un MP3, o 0 si no la tiene. Su tamaño va en 4 bytes de 7 bits. */
+export function id3HeaderSize(bytes) {
+  if (bytes.length < 10 || bytes[0] !== 0x49 || bytes[1] !== 0x44 || bytes[2] !== 0x33) return 0;
+  return 10 + ((bytes[6] << 21) | (bytes[7] << 14) | (bytes[8] << 7) | bytes[9]);
 }
 
 export function formatBytes(bytes) {
@@ -255,10 +261,10 @@ async function encodeMP3(audioBuffer, bitrate, onProgress, signal) {
   return encoder.finish();
 }
 
-/** Con WebCodecs, OGG se codifica con Mediabunny, sin grabar en tiempo real ni depender de MediaRecorder. */
-export async function canEncodeOpus() {
+/** Con WebCodecs, OGG y AAC se codifican con Mediabunny, sin grabar en tiempo real ni depender de MediaRecorder. */
+export async function hasAudioEncoder(codec) {
   try {
-    return (await AudioEncoder.isConfigSupported({ codec: "opus", sampleRate: 48000, numberOfChannels: 2, bitrate: 128000 })).supported;
+    return (await AudioEncoder.isConfigSupported({ codec, sampleRate: 48000, numberOfChannels: 2, bitrate: 128000 })).supported;
   } catch {
     return false;
   }

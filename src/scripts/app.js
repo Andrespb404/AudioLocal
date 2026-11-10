@@ -1,5 +1,7 @@
 import {
+  FORMAT_MAP,
   MAX_DURATION_SECONDS,
+  MAX_FILE_SIZE,
   channelsLabel,
   convertFile,
   decodeFile,
@@ -33,14 +35,20 @@ const ZIP_DONE_MS = 2200;
 const TOOL = document.querySelector("[data-tool]").dataset.tool;
 const settings = TOOL === "video" ? videoSettings : audioSettings;
 
-// Mediabunny es grande: se descarga solo al tratar un video. Sin WebCodecs, un video se decodifica como un audio.
+// Con WebCodecs, audio y video se leen por partes con Mediabunny, sin cargar el archivo completo en memoria.
+// Sin WebCodecs queda el camino clásico, que decodifica todo de una vez: por eso tiene límites de tamaño y duración.
+const STREAMING = TOOL === "video" || typeof AudioDecoder !== "undefined";
 // Si falla, suele ser una pestaña abierta antes de un despliegue: ese archivo ya no existe.
 const loadVideoModule = () =>
   import("./video.js").catch((err) => {
     console.error(err);
     throw new UserError(t.reloadNeeded);
   });
-const usesVideoModule = (file) => TOOL === "video" || (isVideoFile(file) && typeof AudioDecoder !== "undefined");
+/** MP3 y WAV no dependen del navegador; OGG y AAC necesitan su codificador. */
+const canStream = (item, current) => {
+  const { type } = FORMAT_MAP[current.format];
+  return item.streamed && (type === "mp3" || type === "wav" || current.encoders[type]);
+};
 
 const queueList = $("queueList");
 const rowTemplate = $("queueRowTemplate");
@@ -197,9 +205,20 @@ function updateState() {
 async function analyze(item) {
   if (!items.includes(item)) return;
   try {
-    if (usesVideoModule(item.file)) {
+    let meta = null;
+    if (STREAMING) {
       const { probeMedia } = await loadVideoModule();
-      Object.assign(item, { status: STATUS.PENDING, meta: await probeMedia(item.file, TOOL) });
+      meta = await probeMedia(item.file, TOOL).catch((err) => {
+        // Un audio que Mediabunny no lea todavía puede servir por el camino clásico; un video, no.
+        if (TOOL === "video" || isVideoFile(item.file)) throw err;
+        console.warn(err);
+        return null;
+      });
+    }
+    if (meta) {
+      Object.assign(item, { status: STATUS.PENDING, meta, streamed: true });
+    } else if (item.file.size > MAX_FILE_SIZE) {
+      Object.assign(item, { status: STATUS.ERROR, error: t.tooLarge });
     } else {
       const buffer = await decodeFile(item.file);
       if (buffer.duration > MAX_DURATION_SECONDS) {
@@ -285,8 +304,13 @@ async function startConversion() {
       };
       let result;
       if (TOOL === "video") result = await (await loadVideoModule()).convertVideo(item.file, current, report);
-      else if (usesVideoModule(item.file) || (current.format === "ogg" && current.opusEncoder)) result = await (await loadVideoModule()).extractAudio(item.file, current, report);
-      else result = await convertFile(item.file, current, report);
+      else if (canStream(item, current)) result = await (await loadVideoModule()).extractAudio(item.file, current, report);
+      else {
+        // El camino clásico carga todo en memoria: un archivo que solo cabía leyéndolo por partes no puede usarlo.
+        if (item.file.size > MAX_FILE_SIZE) throw new UserError(t.tooLarge);
+        if (item.meta.duration > MAX_DURATION_SECONDS) throw new UserError(t.tooLong);
+        result = await convertFile(item.file, current, report);
+      }
       // Con margen: cambiar de contenedor sin recodificar puede sumar unos pocos KB, y eso no merece un aviso.
       if (TOOL === "video" && result.blob.size > item.file.size * 1.05) warn(t.largerResult);
       return { ...result, warnings, url: URL.createObjectURL(result.blob), name: outputName(item.file.name, result.ext) };

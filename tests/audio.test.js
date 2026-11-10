@@ -4,6 +4,7 @@ import {
   FORMAT_MAP,
   encodeWAV,
   estimateOutputBytes,
+  id3HeaderSize,
   targetSampleRate,
   getFileFormatLabel,
   isVideoFile,
@@ -65,7 +66,14 @@ test("validateFile rechaza formato y tamaño, sin exigir tipo MIME", () => {
   assert.equal(validateFile({ name: "a.flac", type: "", size: 10 }), null);
   assert.equal(validateFile({ name: "a.bin", type: "audio/flac", size: 10 }), null);
   assert.match(validateFile({ name: "a.txt", type: "text/plain", size: 10 }), /Formato/);
-  assert.match(validateFile({ name: "a.wav", type: "audio/wav", size: 151 * 1024 * 1024 }), /150 MB/);
+  assert.equal(validateFile({ name: "nota.opus", type: "", size: 10 }), null);
+});
+
+test("el audio se lee por partes si el navegador puede, y si no vuelve al límite de 150 MB", () => {
+  const wav = { name: "a.wav", type: "audio/wav", size: 151 * 1024 * 1024 };
+  assert.equal(validateFile(wav, "audio", true), null);
+  assert.match(validateFile(wav, "audio", false), /150 MB/);
+  assert.match(validateFile({ ...wav, size: 3 * 1024 ** 3 }, "audio", true), /2 GB/);
 });
 
 test("los videos se validan según la herramienta", () => {
@@ -88,6 +96,12 @@ test("los videos se validan según la herramienta", () => {
   assert.equal(validateFile(mp4, "audio", true), null);
   assert.match(validateFile(mp4, "audio", false), /150 MB/);
   assert.match(validateFile(avi, "audio", true), /Formato/);
+});
+
+test("mide la cabecera ID3 de un MP3", () => {
+  assert.equal(id3HeaderSize(Uint8Array.of(0x49, 0x44, 0x33, 4, 0, 0, 0, 0, 0x02, 0x01)), 10 + 257);
+  assert.equal(id3HeaderSize(Uint8Array.of(0xff, 0xfb, 0x90, 0, 0, 0, 0, 0, 0, 0)), 0);
+  assert.equal(id3HeaderSize(Uint8Array.of(0x49, 0x44, 0x33)), 0);
 });
 
 test("un video no se etiqueta como AAC", () => {

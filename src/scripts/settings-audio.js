@@ -1,5 +1,5 @@
 // Ajustes de la herramienta de audio.
-import { FORMAT_MAP, canEncodeOpus, isOutputFormatSupported } from "./audio.js";
+import { FORMAT_MAP, hasAudioEncoder, isOutputFormatSupported } from "./audio.js";
 import { t } from "./messages.js";
 import { $ } from "./shared-ui.js";
 
@@ -10,7 +10,7 @@ const channelsSelect = $("channels");
 const sampleRateSelect = $("sampleRate");
 const normalizeSelect = $("normalize");
 const keepSampleRateCheckbox = $("keepSampleRate");
-let opusEncoder = false;
+let encoders = { ogg: false, aac: false }; // Formatos que este navegador codifica directo, sin tiempo real
 
 function selectedFormat() {
   const type = typeRadios.find((radio) => radio.checked)?.value ?? "wav";
@@ -37,7 +37,7 @@ export const audioSettings = {
       sampleRate: Number(sampleRateSelect.value),
       normalize: normalizeSelect.value === "1",
       keepSampleRate: keepSampleRateCheckbox.checked,
-      opusEncoder,
+      encoders,
     };
   },
 
@@ -77,9 +77,9 @@ export const audioSettings = {
   },
 
   async prepare() {
-    opusEncoder = await canEncodeOpus();
+    encoders = { ogg: await hasAudioEncoder("opus"), aac: await hasAudioEncoder("mp4a.40.2") };
     for (const radio of typeRadios) {
-      radio.disabled = radio.value !== "mp3" && !isOutputFormatSupported(radio.value) && !(radio.value === "ogg" && opusEncoder);
+      radio.disabled = radio.value !== "mp3" && !isOutputFormatSupported(radio.value) && !encoders[radio.value];
       if (!radio.disabled) continue;
       radio.closest("label").querySelector("[data-detail]").textContent = t.unavailableHere;
       if (radio.checked) checkRadio(typeRadios, "mp3");
@@ -94,6 +94,6 @@ export const audioSettings = {
     if (isMp3 && sampleRateSelect.value === "96000") sampleRateSelect.value = "48000";
     sampleRateSelect.disabled = keepSampleRateCheckbox.checked || Boolean(formatInfo.realtime);
     $("qualityField").hidden = !isMp3;
-    $("formatNote").hidden = !formatInfo.realtime || (formatInfo.type === "ogg" && opusEncoder);
+    $("formatNote").hidden = !formatInfo.realtime || encoders[formatInfo.type];
   },
 };

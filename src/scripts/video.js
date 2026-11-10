@@ -4,8 +4,12 @@ import {
   AudioSample,
   AudioSampleSink,
   BlobSource,
+  BufferTarget,
   Conversion,
+  EncodedAudioPacketSource,
+  EncodedPacketSink,
   Input,
+  Mp3OutputFormat,
   Mp4OutputFormat,
   OggOutputFormat,
   Output,
@@ -18,7 +22,7 @@ import {
   getFirstEncodableAudioCodec,
   getFirstEncodableVideoCodec,
 } from "mediabunny";
-import { FORMAT_MAP, formatLabel, mp3StreamEncoder, targetSampleRate } from "./audio.js";
+import { FORMAT_MAP, formatLabel, id3HeaderSize, mp3StreamEncoder, targetSampleRate } from "./audio.js";
 import { PART_SIZE, writeAt } from "./blob-parts.js";
 import { t } from "./messages.js";
 import { UserError } from "./shared-ui.js";
@@ -65,6 +69,7 @@ export async function probeMedia(file, tool) {
     }
     if (tool === "video" && !videoTrack) throw new UserError(t.noVideoTrack);
     if (tool === "audio" && !audioTrack) throw new UserError(t.noAudioTrack);
+    if (tool === "audio" && !(await audioTrack.canDecode())) throw new UserError(t.unreadable);
     return {
       duration: await input.computeDuration(),
       width: videoTrack?.displayWidth,
@@ -181,6 +186,7 @@ function applyGain(sample, gain) {
 /** MP3 por partes con lamejs: el audio nunca se carga completo en memoria. */
 async function encodeTrackToMp3(track, { channels, bitrate, gain, duration, start, onProgress, signal }) {
   const encoder = mp3StreamEncoder(channels, track.sampleRate, bitrate);
+  let lastPause = performance.now();
   for await (const sample of new AudioSampleSink(track).samples()) {
     const planes = [];
     for (let plane = 0; plane < Math.min(sample.numberOfChannels, 2); plane++) {
@@ -198,12 +204,43 @@ async function encodeTrackToMp3(track, { channels, bitrate, gain, duration, star
     onProgress(Math.min(99, Math.round(start + (sample.timestamp / duration) * (99 - start))), t.encoding("MP3"));
     sample.close();
     signal?.throwIfAborted();
-    await new Promise((resolve) => setTimeout(resolve, 0)); // Mantiene la interfaz fluida.
+    // Cede el control cada 50 ms para mantener la interfaz fluida. Hacerlo en cada fragmento sumaba minutos de espera en audios largos.
+    if (performance.now() - lastPause > 50) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      lastPause = performance.now();
+    }
   }
   return encoder.finish();
 }
 
-/** Saca el audio de un video con los mismos ajustes que la herramienta de audio. */
+/**
+ * lamejs entrega el MP3 sin etiquetas. Mediabunny escribe un MP3 mínimo con las del original, y de ahí solo se toma
+ * la cabecera ID3 para anteponerla: reescribir el archivo entero congelaba la página varios segundos en audios largos.
+ * Si algo falla, queda el MP3 tal cual.
+ */
+async function tagMp3(blob, tags) {
+  if (Object.keys(tags).length === 0) return blob;
+  const untagged = openInput(blob);
+  try {
+    const packet = await new EncodedPacketSink(await untagged.getPrimaryAudioTrack()).getFirstPacket();
+    const source = new EncodedAudioPacketSource("mp3");
+    const output = new Output({ format: new Mp3OutputFormat({ xingHeader: false }), target: new BufferTarget() });
+    output.addAudioTrack(source);
+    output.setMetadataTags(tags);
+    await output.start();
+    await source.add(packet);
+    await output.finalize();
+    const bytes = new Uint8Array(output.target.buffer);
+    return new Blob([bytes.subarray(0, id3HeaderSize(bytes)), blob], { type: blob.type });
+  } catch (err) {
+    console.warn("El MP3 queda sin etiquetas:", err);
+    return blob;
+  } finally {
+    untagged.dispose();
+  }
+}
+
+/** Convierte el audio de un archivo de audio o de video, leyéndolo por partes. */
 export async function extractAudio(file, settings, { onProgress = () => {}, signal } = {}) {
   const input = openInput(file);
   let pcmInput = null;
@@ -236,8 +273,10 @@ export async function extractAudio(file, settings, { onProgress = () => {}, sign
         pcmInput = openInput(blob);
         source = await pcmInput.getPrimaryAudioTrack();
       }
-      const blob = await encodeTrackToMp3(source, { channels, bitrate: formatInfo.bitrate, gain, duration, start: Math.max(start, source === track ? 0 : 50), onProgress, signal });
-      return { ...result, blob };
+      const mp3 = await encodeTrackToMp3(source, { channels, bitrate: formatInfo.bitrate, gain, duration, start: Math.max(start, source === track ? 0 : 50), onProgress, signal });
+      // `raw` son etiquetas en el formato de origen (por ejemplo, de FLAC): no valen para ID3.
+      const { raw: _raw, ...tags } = await input.getMetadataTags();
+      return { ...result, blob: await tagMp3(mp3, tags) };
     }
 
     const audio = { numberOfChannels: channels };
